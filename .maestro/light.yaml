@@ -34,7 +34,9 @@ appId: com.camach0f.shiftlog
 - takeScreenshot: 06-selector-hora
 - pressKey: back
 - pressKey: back
-- takeScreenshot: 07-despues-de-volver
+- takeScreenshot: 07-trabajo
+- pressKey: back
+- takeScreenshot: 07b-despues-de-volver
 
 # Add a shift to the 15th of the current month
 - tapOn: "Turnos"

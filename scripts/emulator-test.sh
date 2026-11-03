@@ -22,9 +22,9 @@ fi
 
 status=0
 cd "$OUT/shots"
-maestro test "$ROOT/.maestro/light.yaml" || status=$?
+maestro test --test-output-dir "$OUT/maestro-light" "$ROOT/.maestro/light.yaml" || status=$?
 adb shell cmd uimode night yes
-maestro test "$ROOT/.maestro/dark.yaml" || status=$?
+maestro test --test-output-dir "$OUT/maestro-dark" "$ROOT/.maestro/dark.yaml" || status=$?
 
 kill "$LOGCAT" 2>/dev/null
 if grep -q "FATAL EXCEPTION" "$OUT/logcat.txt"; then
