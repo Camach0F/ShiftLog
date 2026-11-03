@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MonthGrid, Pill } from '@/components/MonthGrid';
 import { TypePicker } from '@/components/TypePicker';
@@ -8,12 +9,15 @@ import { Button, Card } from '@/components/ui';
 import { todayKey } from '@/lib/dates';
 import { byStart, formatDuration, formatMoney, resolveEntry, summarize, type Resolved } from '@/lib/hours';
 import { entryFromType, useStore } from '@/lib/store';
+import { useLayout } from '@/lib/layout';
 import { useTheme } from '@/lib/theme';
 import type { ShiftEntry } from '@/lib/types';
 
 /** Work shifts calendar: everything on this screen counts towards hours and pay. */
 export default function ShiftsScreen() {
   const t = useTheme();
+  const { isWide, contentMax } = useLayout();
+  const insets = useSafeAreaInsets();
   const { state, applyEntries } = useStore();
   const { weekStartsOn, currency } = state.settings;
   const [anchor, setAnchor] = useState(todayKey());
@@ -74,7 +78,7 @@ export default function ShiftsScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { maxWidth: contentMax }]}>
         {state.jobs.length === 0 && (
           <Card style={{ marginBottom: 8, gap: 10 }}>
             <Text style={{ color: t.text, fontWeight: '600' }}>Crea tu primer trabajo</Text>
@@ -135,7 +139,14 @@ export default function ShiftsScreen() {
       </ScrollView>
 
       {selecting && (
-        <View style={[styles.panel, { backgroundColor: t.card, borderTopColor: t.border }]}>
+        <View
+          style={[
+            styles.panel,
+            { backgroundColor: t.card, borderTopColor: t.border },
+            // With the tab bar at the side nothing sits under the panel, so keep clear of the system bar.
+            isWide && { paddingBottom: 16 + insets.bottom },
+          ]}
+        >
           <Text style={{ color: t.text, fontWeight: '600', marginBottom: 4 }}>
             {selected.size} {selected.size === 1 ? 'día seleccionado' : 'días seleccionados'}
           </Text>

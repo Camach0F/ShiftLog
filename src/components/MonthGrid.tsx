@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState, type ReactNode } from 'react';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { addMonths, formatMonth, fromKey, monthGrid, todayKey, weekdayLabels } from '@/lib/dates';
 import { useTheme } from '@/lib/theme';
@@ -31,8 +31,14 @@ export function MonthGrid({
   const month = anchor.slice(0, 7);
   const days = monthGrid(anchor, weekStartsOn);
 
+  // Cells grow with the space they get: taller on tablets, never below the phone size.
+  const [gridWidth, setGridWidth] = useState(0);
+  const cellWidth = gridWidth / 7;
+  const cellHeight = gridWidth ? Math.round(Math.min(140, Math.max(84, cellWidth * 1.15))) : 84;
+  const badge = cellWidth >= 90 ? 32 : 26;
+
   return (
-    <View>
+    <View onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}>
       <View style={styles.monthBar}>
         <Pressable accessibilityLabel="Mes anterior" hitSlop={12} onPress={() => onAnchorChange(addMonths(anchor, -1))}>
           <Ionicons name="chevron-back" size={26} color={t.accent} />
@@ -65,12 +71,13 @@ export function MonthGrid({
               onPress={() => onPressDay(key)}
               style={[
                 styles.cell,
+                { minHeight: cellHeight },
                 { borderColor: t.border, opacity: key.startsWith(month) ? 1 : 0.35 },
                 isSelected && { backgroundColor: t.accent + '33' },
               ]}
             >
-              <View style={[styles.dayBadge, isToday && { backgroundColor: t.accent }, isSelected && { borderWidth: 2, borderColor: t.accent }]}>
-                <Text style={{ color: isToday ? t.onAccent : t.text, fontWeight: '600' }}>{fromKey(key).getDate()}</Text>
+              <View style={[styles.dayBadge, { width: badge, height: badge, borderRadius: badge / 2 }, isToday && { backgroundColor: t.accent }, isSelected && { borderWidth: 2, borderColor: t.accent }]}>
+                <Text maxFontSizeMultiplier={1.2} style={{ color: isToday ? t.onAccent : t.text, fontWeight: '600', fontSize: badge > 26 ? 16 : 14 }}>{fromKey(key).getDate()}</Text>
               </View>
               {renderDay?.(key)}
             </Pressable>
@@ -82,9 +89,16 @@ export function MonthGrid({
 }
 
 export function Pill({ label, color }: { label: string; color: string }) {
+  const { width } = useWindowDimensions();
   return (
     <View style={[styles.pill, { backgroundColor: color }]}>
-      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={styles.pillText}>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+        maxFontSizeMultiplier={1.2}
+        style={[styles.pillText, width >= 600 && { fontSize: 12 }]}
+      >
         {label}
       </Text>
     </View>
@@ -99,7 +113,6 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: {
     width: `${100 / 7}%`,
-    minHeight: 84,
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingVertical: 4,
     paddingHorizontal: 2,

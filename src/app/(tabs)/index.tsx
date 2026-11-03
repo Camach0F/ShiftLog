@@ -6,6 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MonthGrid, Pill } from '@/components/MonthGrid';
 import { Button, Card } from '@/components/ui';
 import { formatLong, todayKey } from '@/lib/dates';
+import { useLayout } from '@/lib/layout';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 import type { AgendaEvent } from '@/lib/types';
@@ -16,6 +17,7 @@ const byTime = (a: AgendaEvent, b: AgendaEvent) =>
 /** Personal agenda: appointments and reminders. Nothing here counts towards hours or pay. */
 export default function AgendaScreen() {
   const t = useTheme();
+  const { isWide } = useLayout();
   const { state } = useStore();
   const [anchor, setAnchor] = useState(todayKey());
   const [day, setDay] = useState(todayKey());
@@ -29,27 +31,29 @@ export default function AgendaScreen() {
 
   const events = eventsByDay.get(day) ?? [];
 
-  return (
-    <ScrollView contentContainerStyle={styles.content}>
-      <MonthGrid
-        anchor={anchor}
-        onAnchorChange={setAnchor}
-        weekStartsOn={state.settings.weekStartsOn}
-        selected={new Set([day])}
-        onPressDay={setDay}
-        renderDay={(key) => {
-          const list = eventsByDay.get(key) ?? [];
-          return (
-            <>
-              {list.slice(0, 3).map((e) => (
-                <Pill key={e.id} label={e.title} color={e.color} />
-              ))}
-              {list.length > 3 && <Text style={{ color: t.sub, fontSize: 10 }}>+{list.length - 3}</Text>}
-            </>
-          );
-        }}
-      />
+  const grid = (
+    <MonthGrid
+      anchor={anchor}
+      onAnchorChange={setAnchor}
+      weekStartsOn={state.settings.weekStartsOn}
+      selected={new Set([day])}
+      onPressDay={setDay}
+      renderDay={(key) => {
+        const list = eventsByDay.get(key) ?? [];
+        return (
+          <>
+            {list.slice(0, 3).map((e) => (
+              <Pill key={e.id} label={e.title} color={e.color} />
+            ))}
+            {list.length > 3 && <Text style={{ color: t.sub, fontSize: 10 }}>+{list.length - 3}</Text>}
+          </>
+        );
+      }}
+    />
+  );
 
+  const details = (
+    <>
       <Text style={[styles.heading, { color: t.text }]}>{formatLong(day)}</Text>
       {events.length === 0 ? (
         <Text style={{ color: t.sub, marginBottom: 12 }}>Sin eventos este día.</Text>
@@ -74,12 +78,36 @@ export default function AgendaScreen() {
       <Text style={{ color: t.sub, fontSize: 12, marginTop: 10, textAlign: 'center' }}>
         Los eventos de la agenda no cuentan en las horas ni en el resumen.
       </Text>
+    </>
+  );
+
+  // On wide screens the calendar and the selected day sit side by side.
+  if (isWide) {
+    return (
+      <View style={styles.columns}>
+        <ScrollView style={{ flex: 3 }} contentContainerStyle={styles.column}>
+          {grid}
+        </ScrollView>
+        <ScrollView style={[styles.side, { borderLeftColor: t.border }]} contentContainerStyle={styles.column}>
+          {details}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      {grid}
+      {details}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   content: { padding: 12, paddingBottom: 32, maxWidth: 900, width: '100%', alignSelf: 'center' },
+  columns: { flex: 1, flexDirection: 'row' },
+  column: { padding: 16, paddingBottom: 32 },
+  side: { flex: 2, borderLeftWidth: StyleSheet.hairlineWidth },
   heading: { fontSize: 18, fontWeight: '700', marginTop: 18, marginBottom: 10 },
   event: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   bar: { width: 5, alignSelf: 'stretch', borderRadius: 3 },

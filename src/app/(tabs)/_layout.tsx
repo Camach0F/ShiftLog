@@ -1,16 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
+import { useLayout } from '@/lib/layout';
 import { useTheme } from '@/lib/theme';
 
 export default function TabsLayout() {
   const t = useTheme();
+  const { isWide } = useLayout();
   return (
     <Tabs
       screenOptions={{
+        tabBarPosition: isWide ? 'left' : 'bottom',
+        // Beside the content the active item is a highlighted row; keep its text readable and the bar narrow.
+        ...(isWide && { tabBarActiveBackgroundColor: t.accent + '22', tabBarVariant: 'material' as const }),
         tabBarActiveTintColor: t.accent,
         tabBarInactiveTintColor: t.sub,
-        tabBarStyle: { backgroundColor: t.card, borderTopColor: t.border },
+        tabBarStyle: isWide ? { backgroundColor: t.card, borderRightColor: t.border, width: 220 } : { backgroundColor: t.card, borderTopColor: t.border },
         headerStyle: { backgroundColor: t.card },
         headerTitleStyle: { color: t.text },
         sceneStyle: { backgroundColor: t.bg },
