@@ -1,6 +1,6 @@
 # Walks through the app in light mode: create a job paid per job, add a shift to the calendar,
 # check the summary and exports, and look for updates.
-appId: es.jcamacho.shiftlog
+appId: com.camach0f.shiftlog
 ---
 - launchApp:
     clearState: true

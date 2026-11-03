@@ -10,7 +10,7 @@ import type { AppState } from './types';
  *
  * One-time setup in Google Cloud (see the project notes): enable the Drive API, configure the
  * consent screen, and create an OAuth client of type "Android" with the package name
- * es.jcamacho.shiftlog and the SHA-1 of the key that signs the release APK. No client id is
+ * com.camach0f.shiftlog and the SHA-1 of the key that signs the release APK. No client id is
  * needed in the code: Google matches the app by package name and signing key.
  */
 const SCOPE = 'https://www.googleapis.com/auth/drive.appdata';

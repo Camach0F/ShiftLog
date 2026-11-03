@@ -1,5 +1,5 @@
 # The same screens in dark mode (the workflow switches the emulator to night mode first).
-appId: es.jcamacho.shiftlog
+appId: com.camach0f.shiftlog
 ---
 - launchApp
 - assertVisible: "Agenda"

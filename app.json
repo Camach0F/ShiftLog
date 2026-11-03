@@ -11,7 +11,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "android": {
-      "package": "es.jcamacho.shiftlog",
+      "package": "com.camach0f.shiftlog",
       "adaptiveIcon": {
         "backgroundColor": "#2F6BFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
