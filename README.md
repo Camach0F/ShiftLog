@@ -88,6 +88,14 @@ src/
 
 El cálculo de horas, las horas extra y la migración de datos antiguos viven en `src/lib/hours.ts` y `src/lib/store.tsx`.
 
+## Apoya el proyecto
+
+ShiftLog es gratuita y de código abierto, y siempre lo será. Si te resulta útil y quieres ayudar a seguir mejorándola, puedes hacer una donación voluntaria:
+
+[![Donar por PayPal](https://img.shields.io/badge/Donar-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/jcamachopay)
+
+Donar no desbloquea nada: la app es igual para todos. Gracias por el apoyo.
+
 ## Licencia
 
 Código abierto bajo la licencia [MIT](LICENSE). Puedes usarlo, modificarlo y distribuirlo libremente manteniendo el aviso de copyright.
