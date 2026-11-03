@@ -48,52 +48,6 @@ La app tiene dos partes separadas:
 
 Los APK los compila y firma GitHub Actions a partir de este código, así que el archivo de Releases es el que sale del repositorio. Requiere Android 7 o superior.
 
-## Desarrollo
-
-Todo se comprueba y se compila en GitHub; no se usa Expo Go ni ningún servicio externo. En local solo hace falta Node.js (una versión LTS reciente) para las comprobaciones:
-
-```bash
-npm install
-npx tsc --noEmit   # tipos
-npm run lint       # lint
-```
-
-> El proyecto incluye un `.npmrc` con `legacy-peer-deps=true` por un conflicto de versiones entre `react` y `react-dom`. Si añades dependencias con `npx expo install`, hazlo con `-- --legacy-peer-deps`.
-
-## Generar el APK de Android
-
-El APK lo compila **GitHub Actions** (flujo `.github/workflows/android-apk.yml`): genera el proyecto de Android con `expo prebuild`, lo compila con Gradle y lo firma con tu clave. No hace falta Android Studio ni ningún servicio de pago.
-
-### Una sola vez: crear la clave de firma
-Necesitas [`openssl`](https://www.openssl.org) y la CLI de GitHub (`gh`) con sesión iniciada. Desde la carpeta del proyecto:
-
-```bash
-./scripts/create-signing-key.sh
-```
-
-Esto crea una clave, guarda su contraseña aleatoria como **secretos del repositorio** (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`) y deja una copia en `~/ShiftLog-signing`. **Guarda esa copia en un gestor de contraseñas**: las actualizaciones solo se instalan encima de la versión anterior si van firmadas con la misma clave. Nunca subas esos archivos al repositorio.
-
-### Compilar
-- **A mano:** en la pestaña *Actions* de GitHub, elige *Build Android APK* y pulsa *Run workflow*. El APK queda como artefacto de la ejecución.
-- **Publicar una versión:** crea y sube una etiqueta, por ejemplo:
-  ```bash
-  git tag v1.0.1 && git push origin v1.0.1
-  ```
-  El flujo compila el APK y lo publica en *Releases* con ese número de versión.
-
-## Estructura
-
-```
-src/
-  app/            Pantallas
-    (tabs)/       Agenda, Turnos, Resumen y Trabajos
-    day/ entry/ event/ job/ type/ rotation/   Pantallas de detalle y edición
-  components/     Cuadrícula del mes, selector de turnos, controles
-  lib/            Modelo de datos, almacén, cálculo de horas, exportación, plantillas
-```
-
-El cálculo de horas, las horas extra y la migración de datos antiguos viven en `src/lib/hours.ts` y `src/lib/store.tsx`.
-
 ## Apoya el proyecto
 
 ShiftLog es gratuita y de código abierto, y siempre lo será. Si te resulta útil y quieres ayudar a seguir mejorándola, puedes hacer una donación voluntaria:

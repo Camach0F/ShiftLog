@@ -23,7 +23,7 @@ jobs:
         run: |
           for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS; do
             if [ -z "${!name}" ]; then
-              echo "::error::Missing secret $name. Run scripts/create-signing-key.sh once (see the README)."
+              echo "::error::Missing secret $name. Run scripts/create-signing-key.sh once (its header explains what it does)."
               exit 1
             fi
           done
