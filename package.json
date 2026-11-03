@@ -14,6 +14,7 @@
     "expo-router": "~58.0.29",
     "expo-sharing": "~58.0.21",
     "expo-status-bar": "~58.0.4",
+    "expo-system-ui": "~58.0.7",
     "react": "19.3.0",
     "react-native": "0.88.1",
     "react-native-safe-area-context": "~5.10.1",
@@ -30,8 +31,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint",
-    "build:apk": "npx eas-cli build --platform android --profile apk"
+    "lint": "expo lint"
   },
   "private": true
 }

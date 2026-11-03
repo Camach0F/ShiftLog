@@ -19,7 +19,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,17 +29,6 @@
       "expo-router",
       "expo-font",
       "expo-sharing"
-    ],
-    "extra": {
-      "router": {
-        "asyncRoutes": {
-          "web": true
-        }
-      },
-      "eas": {
-        "projectId": "278482bb-8ca8-44ff-a6da-78888bfaf6ab"
-      }
-    },
-    "owner": "camach0f"
+    ]
   }
 }

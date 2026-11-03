@@ -53,16 +53,26 @@ npm run lint       # lint
 
 ## Generar el APK de Android
 
-El APK se compila en la nube con [EAS Build](https://docs.expo.dev/build/introduction/), sin pasar por Google Play. El perfil `apk` de `eas.json` genera un archivo instalable directamente.
+El APK lo compila **GitHub Actions** (flujo `.github/workflows/android-apk.yml`): genera el proyecto de Android con `expo prebuild`, lo compila con Gradle y lo firma con tu clave. No hace falta Android Studio ni ningún servicio de pago.
+
+### Una sola vez: crear la clave de firma
+Necesitas [`openssl`](https://www.openssl.org) y la CLI de GitHub (`gh`) con sesión iniciada. Desde la carpeta del proyecto:
 
 ```bash
-npx eas-cli login      # una vez, con tu cuenta de Expo
-npm run build:apk
+./scripts/create-signing-key.sh
 ```
 
-Al terminar, Expo da un enlace para descargar el `.apk`. Para instalarlo en un móvil hay que permitir «instalar apps de orígenes desconocidos».
+Esto crea una clave, guarda su contraseña aleatoria como **secretos del repositorio** (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`) y deja una copia en `~/ShiftLog-signing`. **Guarda esa copia en un gestor de contraseñas**: las actualizaciones solo se instalan encima de la versión anterior si van firmadas con la misma clave. Nunca subas esos archivos al repositorio.
 
-> **Clave de firma.** Las actualizaciones solo se instalan encima de la versión anterior si van firmadas con la misma clave. Expo la guarda en sus servidores; puedes hacer una copia con `npx eas-cli credentials`. **No subas nunca el archivo `.jks` ni un `credentials.json` al repositorio** (el `.gitignore` ya excluye los `.jks`).
+### Compilar
+- **A mano:** en la pestaña *Actions* de GitHub, elige *Build Android APK* y pulsa *Run workflow*. El APK queda como artefacto de la ejecución.
+- **Publicar una versión:** crea y sube una etiqueta, por ejemplo:
+  ```bash
+  git tag v1.0.1 && git push origin v1.0.1
+  ```
+  El flujo compila el APK y lo publica en *Releases* con ese número de versión.
+
+Para instalarlo en un móvil Android hay que permitir «instalar apps de orígenes desconocidos».
 
 ## Estructura
 
