@@ -2,7 +2,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { Button, Card, Chip, Field } from '@/components/ui';
+import { TypePicker } from '@/components/TypePicker';
+import { Button, Card, Field } from '@/components/ui';
 import { addDays, daysBetween, isValidKey, todayKey } from '@/lib/dates';
 import { newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -89,12 +90,7 @@ export default function RotationScreen() {
           {cycle.map((typeId, i) => (
             <Card key={i} style={{ gap: 8 }}>
               <Text style={{ color: t.text, fontWeight: '600' }}>Día {i + 1}</Text>
-              <View style={styles.chips}>
-                <Chip label="Nada" color={t.sub} selected={typeId === null} onPress={() => setDay(i, null)} />
-                {state.types.map((type) => (
-                  <Chip key={type.id} label={type.name} color={type.color} selected={typeId === type.id} onPress={() => setDay(i, type.id)} />
-                ))}
-              </View>
+              <TypePicker allowNone selectedId={typeId} onPick={(next) => setDay(i, next)} />
             </Card>
           ))}
         </View>
@@ -141,7 +137,6 @@ export default function RotationScreen() {
 const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 48, maxWidth: 700, width: '100%', alignSelf: 'center' },
   section: { fontSize: 12, marginTop: 14, marginBottom: 10, marginLeft: 4 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   pair: { flexDirection: 'row', gap: 12, marginTop: 12 },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
 });

@@ -1,5 +1,5 @@
 import { startOfWeek } from './dates';
-import type { Settings, ShiftEntry, ShiftType } from './types';
+import type { AppState, Job, ShiftEntry, ShiftType } from './types';
 
 const TIME_RE = /^([01]?\d|2[0-3]):([0-5]\d)$/;
 
@@ -46,23 +46,31 @@ export function formatDuration(min: number): string {
 
 export const formatMoney = (amount: number, currency: string) => `${amount.toFixed(2)} ${currency}`;
 
-export type TypeTotals = { type: ShiftType; count: number; minutes: number; pay: number };
+/** Hourly rate of a shift type: its own override, else the job's, else none. */
+export const rateFor = (type: ShiftType, job: Job | undefined) => type.hourlyRate ?? job?.hourlyRate ?? null;
+
+export type TypeTotals = { type: ShiftType; job: Job | undefined; count: number; minutes: number; pay: number };
+export type JobTotals = { job: Job; minutes: number; pay: number; overtimeMinutes: number; worked: number };
+
+type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
 
 /**
- * Daily overtime counts for the days inside the range. Weekly overtime (what is left above
- * the weekly limit once daily overtime is taken out) counts for the range that contains the
- * first day of that week, so a week split between two months is never counted twice.
+ * Overtime of one job. Daily overtime counts for the days inside the range. Weekly overtime
+ * (what is left above the weekly limit once daily overtime is taken out) counts for the range
+ * that contains the first day of that week, so a week split between two months is never
+ * counted twice.
  */
-function overtimeFor(entries: ShiftEntry[], byId: Map<string, ShiftType>, from: string, to: string, settings: Settings) {
-  const { overtime, weekStartsOn } = settings;
+function overtimeFor(entries: ShiftEntry[], types: Map<string, ShiftType>, job: Job, from: string, to: string, weekStartsOn: number) {
+  const { overtime } = job;
   const days = new Map<string, { min: number; pay: number }>();
   for (const e of entries) {
-    const type = byId.get(e.typeId);
+    const type = types.get(e.typeId);
     if (!type) continue;
     const min = entryMinutes(e, type);
+    const rate = rateFor(type, job);
     const day = days.get(e.date) ?? { min: 0, pay: 0 };
     day.min += min;
-    day.pay += type.hourlyRate ? (min / 60) * type.hourlyRate : 0;
+    day.pay += rate ? (min / 60) * rate : 0;
     days.set(e.date, day);
   }
 
@@ -99,40 +107,61 @@ function overtimeFor(entries: ShiftEntry[], byId: Map<string, ShiftType>, from: 
   return { minutes, pay };
 }
 
-export function summarize(entries: ShiftEntry[], types: ShiftType[], from: string, to: string, settings: Settings) {
-  const byId = new Map(types.map((t) => [t.id, t]));
+/** Totals for a date range, optionally restricted to one job. */
+export function summarize(data: Data, from: string, to: string, jobId: string | null = null) {
+  const types = new Map(data.types.map((t) => [t.id, t]));
+  const jobs = new Map(data.jobs.map((j) => [j.id, j]));
   const perType = new Map<string, TypeTotals>();
-  let minutes = 0;
-  let pay = 0;
-  let worked = 0;
+  const perJob = new Map<string, JobTotals>();
+  const inJob = new Map<string, ShiftEntry[]>();
 
-  for (const e of entries) {
+  for (const e of data.entries) {
+    const type = types.get(e.typeId);
+    const job = type && jobs.get(type.jobId);
+    if (!type || !job || (jobId !== null && job.id !== jobId)) continue;
+    inJob.set(job.id, [...(inJob.get(job.id) ?? []), e]);
     if (e.date < from || e.date > to) continue;
-    const type = byId.get(e.typeId);
-    if (!type) continue;
+
     const min = entryMinutes(e, type);
-    const earned = type.hourlyRate ? (min / 60) * type.hourlyRate : 0;
-    const row = perType.get(type.id) ?? { type, count: 0, minutes: 0, pay: 0 };
+    const rate = rateFor(type, job);
+    const earned = rate ? (min / 60) * rate : 0;
+
+    const row = perType.get(type.id) ?? { type, job, count: 0, minutes: 0, pay: 0 };
     row.count += 1;
     row.minutes += min;
     row.pay += earned;
     perType.set(type.id, row);
-    minutes += min;
-    pay += earned;
-    if (min > 0) worked += 1;
+
+    const jobRow = perJob.get(job.id) ?? { job, minutes: 0, pay: 0, overtimeMinutes: 0, worked: 0 };
+    jobRow.minutes += min;
+    jobRow.pay += earned;
+    if (min > 0) jobRow.worked += 1;
+    perJob.set(job.id, jobRow);
   }
 
-  const overtime = settings.overtime.enabled
-    ? overtimeFor(entries, byId, from, to, settings)
-    : { minutes: 0, pay: 0 };
+  let overtimeMinutes = 0;
+  let overtimePay = 0;
+  for (const [id, entries] of inJob) {
+    const job = jobs.get(id)!;
+    if (!job.overtime.enabled) continue;
+    const ot = overtimeFor(entries, types, job, from, to, data.settings.weekStartsOn);
+    overtimeMinutes += ot.minutes;
+    overtimePay += ot.pay;
+    const jobRow = perJob.get(id) ?? { job, minutes: 0, pay: 0, overtimeMinutes: 0, worked: 0 };
+    jobRow.overtimeMinutes = ot.minutes;
+    jobRow.pay += ot.pay;
+    perJob.set(id, jobRow);
+  }
 
+  const jobRows = [...perJob.values()].sort((a, b) => b.minutes - a.minutes);
   return {
-    minutes,
+    minutes: jobRows.reduce((n, r) => n + r.minutes, 0),
     /** Base pay plus the overtime premium */
-    pay: pay + overtime.pay,
-    overtimeMinutes: overtime.minutes,
-    overtimePay: overtime.pay,
-    worked,
+    pay: jobRows.reduce((n, r) => n + r.pay, 0),
+    overtimeMinutes,
+    overtimePay,
+    worked: jobRows.reduce((n, r) => n + r.worked, 0),
     rows: [...perType.values()].sort((a, b) => b.minutes - a.minutes),
+    jobRows,
   };
 }

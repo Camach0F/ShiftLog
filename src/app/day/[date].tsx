@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Chip } from '@/components/ui';
+import { TypePicker } from '@/components/TypePicker';
+import { Card } from '@/components/ui';
 import { formatLong } from '@/lib/dates';
 import { effective, entryMinutes, formatDuration } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
@@ -35,6 +36,7 @@ export default function DayScreen() {
                 <View style={[styles.bar, { backgroundColor: type.color }]} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: t.text, fontSize: 17, fontWeight: '700' }}>{type.name}</Text>
+                  {state.jobs.length > 1 && <Text style={{ color: t.sub, fontSize: 12 }}>{state.jobs.find((j) => j.id === type.jobId)?.name}</Text>}
                   <Text style={{ color: t.sub }}>
                     {minutes > 0 ? `${start} – ${end} · ${formatDuration(minutes)}` : 'Sin horas'}
                   </Text>
@@ -59,16 +61,7 @@ export default function DayScreen() {
       </View>
 
       <Text style={[styles.section, { color: t.sub }]}>AÑADIR TURNO</Text>
-      <View style={styles.chips}>
-        {state.types.map((type) => (
-          <Chip
-            key={type.id}
-            label={type.name}
-            color={type.color}
-            onPress={() => saveEntry({ id: newId(), date, typeId: type.id, note: '' })}
-          />
-        ))}
-      </View>
+      <TypePicker onPick={(typeId) => typeId && saveEntry({ id: newId(), date, typeId, note: '' })} />
       <Text style={{ color: t.sub, marginTop: 14, fontSize: 13 }}>
         Toca un turno para cambiar su horario, descanso o añadir una nota.
       </Text>
@@ -82,5 +75,4 @@ const styles = StyleSheet.create({
   entryMain: { flex: 1, flexDirection: 'row', gap: 12 },
   bar: { width: 5, borderRadius: 3 },
   section: { fontSize: 12, marginTop: 24, marginBottom: 10, marginLeft: 4 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });

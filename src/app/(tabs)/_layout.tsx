@@ -25,8 +25,8 @@ export default function TabsLayout() {
         options={{ title: 'Resumen', tabBarIcon: ({ focused, size }) => <Ionicons name="stats-chart" color={focused ? t.accent : t.sub} size={size} /> }}
       />
       <Tabs.Screen
-        name="types"
-        options={{ title: 'Turnos', tabBarIcon: ({ focused, size }) => <Ionicons name="color-palette" color={focused ? t.accent : t.sub} size={size} /> }}
+        name="jobs"
+        options={{ title: 'Trabajos', tabBarIcon: ({ focused, size }) => <Ionicons name="briefcase" color={focused ? t.accent : t.sub} size={size} /> }}
       />
     </Tabs>
   );

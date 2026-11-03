@@ -9,16 +9,25 @@ import { TYPE_COLORS, useTheme } from '@/lib/theme';
 
 export default function TypeScreen() {
   const t = useTheme();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, jobId } = useLocalSearchParams<{ id: string; jobId?: string }>();
   const { state, saveType, deleteType } = useStore();
   const existing = state.types.find((x) => x.id === id);
+  const job = state.jobs.find((j) => j.id === (existing?.jobId ?? jobId));
 
   const [name, setName] = useState(existing?.name ?? '');
-  const [color, setColor] = useState(existing?.color ?? TYPE_COLORS[3]);
+  const [color, setColor] = useState(existing?.color ?? job?.color ?? TYPE_COLORS[3]);
   const [start, setStart] = useState(existing?.start ?? '09:00');
   const [end, setEnd] = useState(existing?.end ?? '17:00');
   const [breakMin, setBreakMin] = useState(String(existing?.breakMin ?? 0));
   const [rate, setRate] = useState(existing?.hourlyRate != null ? String(existing.hourlyRate) : '');
+
+  if (!job) {
+    return (
+      <View style={styles.content}>
+        <Text style={{ color: t.sub }}>Este tipo de turno no pertenece a ningún trabajo.</Text>
+      </View>
+    );
+  }
 
   const s = normalizeTime(start);
   const e = normalizeTime(end);
@@ -32,7 +41,7 @@ export default function TypeScreen() {
       Alert.alert('Datos no válidos', 'Revisa el nombre, las horas (HH:mm), el descanso y la tarifa.');
       return;
     }
-    saveType({ id: existing?.id ?? newId(), name: name.trim(), color, start: s, end: e, breakMin: brk, hourlyRate: rateNum });
+    saveType({ id: existing?.id ?? newId(), jobId: job.id, name: name.trim(), color, start: s, end: e, breakMin: brk, hourlyRate: rateNum });
     router.back();
   };
 
@@ -59,6 +68,11 @@ export default function TypeScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.jobRow}>
+          <View style={[styles.jobDot, { backgroundColor: job.color }]} />
+          <Text style={{ color: t.sub }}>{job.name}</Text>
+        </View>
+
         <Field label="Nombre" value={name} onChangeText={setName} placeholder="Mañana" />
 
         <Text style={[styles.label, { color: t.sub }]}>Color</Text>
@@ -86,7 +100,7 @@ export default function TypeScreen() {
           value={rate}
           onChangeText={setRate}
           keyboardType="decimal-pad"
-          placeholder="Sin tarifa"
+          placeholder={job.hourlyRate != null ? `Como el trabajo (${job.hourlyRate})` : 'Sin tarifa'}
         />
 
         <Text style={{ color: t.text, fontSize: 16, fontWeight: '600', marginVertical: 8 }}>
@@ -106,6 +120,8 @@ export default function TypeScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40, maxWidth: 700, width: '100%', alignSelf: 'center' },
+  jobRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
+  jobDot: { width: 10, height: 10, borderRadius: 5 },
   label: { fontSize: 13, marginBottom: 8 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
   swatch: { width: 36, height: 36, borderRadius: 18, borderWidth: 3 },

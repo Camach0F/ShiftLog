@@ -3,7 +3,8 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button, Card, Chip } from '@/components/ui';
+import { TypePicker } from '@/components/TypePicker';
+import { Button, Card } from '@/components/ui';
 import { addMonths, fromKey, formatMonth, monthGrid, todayKey, weekdayLabels } from '@/lib/dates';
 import { formatDuration, formatMoney, summarize } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
@@ -29,7 +30,7 @@ export default function CalendarScreen() {
     return map;
   }, [state.entries]);
 
-  const totals = summarize(state.entries, state.types, `${month}-01`, `${month}-31`, state.settings);
+  const totals = summarize(state, `${month}-01`, `${month}-31`);
 
   const stopSelecting = () => {
     setSelecting(false);
@@ -84,6 +85,14 @@ export default function CalendarScreen() {
             <Ionicons name="chevron-forward" size={26} color={t.accent} />
           </Pressable>
         </View>
+
+        {state.jobs.length === 0 && (
+          <Card style={{ marginVertical: 8, gap: 10 }}>
+            <Text style={{ color: t.text, fontWeight: '600' }}>Crea tu primer trabajo</Text>
+            <Text style={{ color: t.sub }}>Define tu trabajo, sus turnos y su tarifa para empezar a apuntar horas.</Text>
+            <Button label="Nuevo trabajo" onPress={() => router.push({ pathname: '/job/[id]', params: { id: 'new' } })} />
+          </Card>
+        )}
 
         <Pressable style={styles.selectToggle} hitSlop={8} onPress={() => (selecting ? stopSelecting() : setSelecting(true))}>
           <Text style={{ color: t.accent, fontWeight: '600' }}>{selecting ? 'Cancelar selección' : 'Seleccionar varios días'}</Text>
@@ -165,11 +174,7 @@ export default function CalendarScreen() {
           <Text style={{ color: t.sub, fontSize: 12, marginBottom: 10 }}>Asignar un turno reemplaza lo que hubiera esos días.</Text>
           {selected.size > 0 && (
             <>
-              <View style={styles.chips}>
-                {state.types.map((type) => (
-                  <Chip key={type.id} label={type.name} color={type.color} onPress={() => assign(type.id)} />
-                ))}
-              </View>
+              <TypePicker onPick={(typeId) => typeId && assign(typeId)} />
               <View style={{ marginTop: 10 }}>
                 <Button label="Limpiar días" variant="danger" onPress={clear} />
               </View>
@@ -205,5 +210,4 @@ const styles = StyleSheet.create({
   summaryItem: { alignItems: 'center' },
   summaryValue: { fontSize: 20, fontWeight: '700' },
   panel: { padding: 16, borderTopWidth: StyleSheet.hairlineWidth },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });

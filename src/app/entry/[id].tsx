@@ -2,7 +2,8 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button, Chip, Field } from '@/components/ui';
+import { TypePicker } from '@/components/TypePicker';
+import { Button, Field } from '@/components/ui';
 import { formatDuration, normalizeTime, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -26,7 +27,7 @@ export default function EntryScreen() {
   if (!type) {
     return (
       <View style={styles.content}>
-        <Text style={{ color: t.sub }}>Crea primero un tipo de turno en la pestaña Turnos.</Text>
+        <Text style={{ color: t.sub }}>Crea primero un trabajo con tipos de turno en la pestaña Trabajos.</Text>
       </View>
     );
   }
@@ -69,11 +70,7 @@ export default function EntryScreen() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={[styles.section, { color: t.sub }]}>TIPO</Text>
-        <View style={styles.chips}>
-          {state.types.map((x) => (
-            <Chip key={x.id} label={x.name} color={x.color} selected={x.id === typeId} onPress={() => pickType(x.id)} />
-          ))}
-        </View>
+        <TypePicker selectedId={typeId} onPick={(next) => next && pickType(next)} />
 
         <View style={{ height: 20 }} />
         <View style={styles.pair}>
@@ -106,6 +103,5 @@ export default function EntryScreen() {
 const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40, maxWidth: 700, width: '100%', alignSelf: 'center' },
   section: { fontSize: 12, marginBottom: 10, marginLeft: 4 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   pair: { flexDirection: 'row', gap: 12 },
 });

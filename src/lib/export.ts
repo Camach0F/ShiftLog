@@ -2,27 +2,32 @@ import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { effective, entryMinutes, formatDuration, formatMoney, summarize } from './hours';
-import type { Settings, ShiftEntry, ShiftType } from './types';
+import { effective, entryMinutes, formatDuration, formatMoney, rateFor, summarize } from './hours';
+import type { AppState } from './types';
 
-type Row = { date: string; name: string; start: string; end: string; breakMin: number; minutes: number; pay: number; note: string };
+type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
+type Row = { date: string; job: string; name: string; start: string; end: string; breakMin: number; minutes: number; pay: number; note: string };
 
-function rowsFor(entries: ShiftEntry[], types: ShiftType[], from: string, to: string): Row[] {
-  const byId = new Map(types.map((t) => [t.id, t]));
+function rowsFor(data: Data, from: string, to: string, jobId: string | null): Row[] {
+  const types = new Map(data.types.map((t) => [t.id, t]));
+  const jobs = new Map(data.jobs.map((j) => [j.id, j]));
   const rows: Row[] = [];
-  for (const e of entries) {
-    const type = byId.get(e.typeId);
-    if (!type || e.date < from || e.date > to) continue;
+  for (const e of data.entries) {
+    const type = types.get(e.typeId);
+    const job = type && jobs.get(type.jobId);
+    if (!type || !job || e.date < from || e.date > to || (jobId !== null && job.id !== jobId)) continue;
     const minutes = entryMinutes(e, type);
+    const rate = rateFor(type, job);
     const { start, end, breakMin } = effective(e, type);
     rows.push({
       date: e.date,
+      job: job.name,
       name: type.name,
       start,
       end,
       breakMin,
       minutes,
-      pay: type.hourlyRate ? (minutes / 60) * type.hourlyRate : 0,
+      pay: rate ? (minutes / 60) * rate : 0,
       note: e.note,
     });
   }
@@ -33,11 +38,11 @@ const csvCell = (v: string) => (/[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"
 // Spanish spreadsheets read ";" as separator and "," as decimal mark.
 const decimal = (n: number) => n.toFixed(2).replace('.', ',');
 
-export function buildCsv(entries: ShiftEntry[], types: ShiftType[], from: string, to: string): string {
-  const lines = [['Fecha', 'Turno', 'Entrada', 'Salida', 'Descanso (min)', 'Horas', 'Ingresos', 'Nota'].join(';')];
-  for (const r of rowsFor(entries, types, from, to)) {
+export function buildCsv(data: Data, from: string, to: string, jobId: string | null): string {
+  const lines = [['Fecha', 'Trabajo', 'Turno', 'Entrada', 'Salida', 'Descanso (min)', 'Horas', 'Ingresos', 'Nota'].join(';')];
+  for (const r of rowsFor(data, from, to, jobId)) {
     lines.push(
-      [r.date, r.name, r.start, r.end, String(r.breakMin), decimal(r.minutes / 60), decimal(r.pay), r.note].map(csvCell).join(';'),
+      [r.date, r.job, r.name, r.start, r.end, String(r.breakMin), decimal(r.minutes / 60), decimal(r.pay), r.note].map(csvCell).join(';'),
     );
   }
   return `﻿${lines.join('\r\n')}\r\n`;
@@ -45,22 +50,28 @@ export function buildCsv(entries: ShiftEntry[], types: ShiftType[], from: string
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export function buildHtml(entries: ShiftEntry[], types: ShiftType[], from: string, to: string, label: string, settings: Settings): string {
-  const rows = rowsFor(entries, types, from, to);
-  const totals = summarize(entries, types, from, to, settings);
-  const { currency } = settings;
+export function buildHtml(data: Data, from: string, to: string, label: string, jobId: string | null): string {
+  const rows = rowsFor(data, from, to, jobId);
+  const totals = summarize(data, from, to, jobId);
+  const { currency } = data.settings;
   const showPay = totals.pay > 0;
+  const subtitle = jobId === null ? label : `${label} · ${data.jobs.find((j) => j.id === jobId)?.name ?? ''}`;
 
   const body = rows
     .map(
-      (r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${r.start}–${r.end}</td><td>${r.breakMin} min</td><td class="n">${formatDuration(r.minutes)}</td>${
+      (r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.job)}</td><td>${esc(r.name)}</td><td>${r.start}–${r.end}</td><td>${r.breakMin} min</td><td class="n">${formatDuration(r.minutes)}</td>${
         showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''
       }<td>${esc(r.note)}</td></tr>`,
     )
     .join('');
 
-  const perType = totals.rows
-    .map((r) => `<tr><td>${esc(r.type.name)}</td><td class="n">${r.count}</td><td class="n">${formatDuration(r.minutes)}</td>${showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''}</tr>`)
+  const perJob = totals.jobRows
+    .map(
+      (r) =>
+        `<tr><td>${esc(r.job.name)}</td><td class="n">${r.worked}</td><td class="n">${formatDuration(r.minutes)}</td><td class="n">${
+          r.overtimeMinutes > 0 ? formatDuration(r.overtimeMinutes) : ''
+        }</td>${showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''}</tr>`,
+    )
     .join('');
 
   return `<html><head><meta charset="utf-8" /><style>
@@ -73,14 +84,14 @@ export function buildHtml(entries: ShiftEntry[], types: ShiftType[], from: strin
     .totals { font-size: 15px; margin: 12px 0; }
   </style></head><body>
     <h1>ShiftLog</h1>
-    <div class="sub">${esc(label)}</div>
+    <div class="sub">${esc(subtitle)}</div>
     <div class="totals"><b>${formatDuration(totals.minutes)}</b> · ${totals.worked} turnos${
       totals.overtimeMinutes > 0 ? ` · ${formatDuration(totals.overtimeMinutes)} extra` : ''
     }${showPay ? ` · <b>${esc(formatMoney(totals.pay, currency))}</b>` : ''}</div>
-    <h2>Por tipo de turno</h2>
-    <table><tr><th>Turno</th><th class="n">Veces</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}</tr>${perType}</table>
+    <h2>Por trabajo</h2>
+    <table><tr><th>Trabajo</th><th class="n">Turnos</th><th class="n">Horas</th><th class="n">Extra</th>${showPay ? '<th class="n">Ingresos</th>' : ''}</tr>${perJob}</table>
     <h2>Detalle</h2>
-    <table><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th>Descanso</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}<th>Nota</th></tr>${body}</table>
+    <table><tr><th>Fecha</th><th>Trabajo</th><th>Turno</th><th>Horario</th><th>Descanso</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}<th>Nota</th></tr>${body}</table>
   </body></html>`;
 }
 
