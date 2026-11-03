@@ -33,24 +33,21 @@ La app tiene dos partes separadas:
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
 - Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.
 
-## Cómo ejecutarla
+## Instalar la app
 
-Necesitas Node.js (una versión LTS reciente) y un móvil Android con la app **Expo Go**, o un emulador de Android.
+Descarga el último APK desde [Releases](https://github.com/Camach0F/ShiftLog/releases/latest) en tu móvil o tablet Android y ábrelo. Hay que permitir «instalar apps de orígenes desconocidos». Todo el proceso, desde la compilación hasta la descarga, ocurre en GitHub.
+
+## Desarrollo
+
+Todo se comprueba y se compila en GitHub; no se usa Expo Go ni ningún servicio externo. En local solo hace falta Node.js (una versión LTS reciente) para las comprobaciones:
 
 ```bash
 npm install
-npm start
-```
-
-Después escanea el QR con Expo Go o pulsa `a` para abrir el emulador de Android.
-
-> El proyecto incluye un `.npmrc` con `legacy-peer-deps=true` por un conflicto de versiones entre `react` y `react-dom`. Si añades dependencias con `npx expo install`, hazlo con `-- --legacy-peer-deps`.
-
-### Comprobaciones
-```bash
 npx tsc --noEmit   # tipos
 npm run lint       # lint
 ```
+
+> El proyecto incluye un `.npmrc` con `legacy-peer-deps=true` por un conflicto de versiones entre `react` y `react-dom`. Si añades dependencias con `npx expo install`, hazlo con `-- --legacy-peer-deps`.
 
 ## Generar el APK de Android
 
@@ -72,8 +69,6 @@ Esto crea una clave, guarda su contraseña aleatoria como **secretos del reposit
   git tag v1.0.1 && git push origin v1.0.1
   ```
   El flujo compila el APK y lo publica en *Releases* con ese número de versión.
-
-Para instalarlo en un móvil Android hay que permitir «instalar apps de orígenes desconocidos».
 
 ## Estructura
 
