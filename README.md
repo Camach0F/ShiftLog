@@ -1,15 +1,39 @@
-# ShiftLog
+<p align="center">
+  <img src="assets/icon.png" width="110" alt="Icono de ShiftLog">
+</p>
 
-[![Última versión](https://img.shields.io/github/v/release/Camach0F/ShiftLog?label=versi%C3%B3n)](https://github.com/Camach0F/ShiftLog/releases/latest)
-[![Compilación](https://img.shields.io/github/actions/workflow/status/Camach0F/ShiftLog/android-apk.yml?label=APK)](https://github.com/Camach0F/ShiftLog/actions/workflows/android-apk.yml)
-[![Licencia MIT](https://img.shields.io/github/license/Camach0F/ShiftLog)](LICENSE)
-![Plataforma Android](https://img.shields.io/badge/plataforma-Android-3DDC84?logo=android&logoColor=white)
+<h1 align="center">ShiftLog</h1>
 
-App para **Android** que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
+<p align="center">
+  <b>Tu agenda y tus turnos de trabajo en una sola app para Android.</b><br>
+  Apunta qué trabajas cada día y calcula las horas, las horas extra y los ingresos.
+</p>
 
-Gratuita, sin anuncios, sin cuentas y de código abierto. Todo está desbloqueado. Los datos se guardan en el propio dispositivo y no se envían a ningún servidor. Con internet solo hace dos cosas, ambas opcionales: preguntar a GitHub si hay una versión nueva y, si conectas tu cuenta de Google, guardar una copia de seguridad en una carpeta oculta de tu propio Drive (Ajustes → Copia de seguridad). Más detalles en la [política de privacidad](PRIVACY.md).
+<p align="center">
+  <a href="https://github.com/Camach0F/ShiftLog/releases/latest"><img src="https://img.shields.io/badge/Descargar_APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Descargar el APK"></a>
+</p>
 
-**[⬇ Descargar el APK](https://github.com/Camach0F/ShiftLog/releases/latest)** · [Cómo instalarla](#instalar-la-app) · [Apoya el proyecto](#apoya-el-proyecto)
+<p align="center">
+  <a href="https://github.com/Camach0F/ShiftLog/releases/latest"><img src="https://img.shields.io/github/v/release/Camach0F/ShiftLog?label=versi%C3%B3n" alt="Última versión"></a>
+  <a href="https://github.com/Camach0F/ShiftLog/actions/workflows/android-apk.yml"><img src="https://img.shields.io/github/actions/workflow/status/Camach0F/ShiftLog/android-apk.yml?label=APK" alt="Compilación"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Camach0F/ShiftLog" alt="Licencia MIT"></a>
+  <img src="https://img.shields.io/badge/plataforma-Android-3DDC84?logo=android&logoColor=white" alt="Plataforma Android">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/turnos.png" width="23%" alt="Calendario de turnos">
+  <img src="docs/screenshots/resumen.png" width="23%" alt="Resumen de horas e ingresos">
+  <img src="docs/screenshots/agenda.png" width="23%" alt="Agenda">
+  <img src="docs/screenshots/trabajos.png" width="23%" alt="Trabajos y ajustes">
+</p>
+
+## Por qué ShiftLog
+
+- **Todo gratis y desbloqueado.** Sin anuncios, sin suscripciones y sin cuentas. Código abierto bajo licencia MIT.
+- **Tus datos son tuyos.** Se guardan en tu dispositivo. Con internet solo hace dos cosas, ambas opcionales: avisarte de versiones nuevas y, si conectas tu cuenta de Google, guardar una copia en una carpeta oculta de tu propio Drive. Más detalles en la [política de privacidad](PRIVACY.md).
+- **Pensada para turnos reales.** Varios trabajos, turnos que puedes ajustar cada día, horas extra, rotaciones y cobro por horas o por trabajo.
+
+[Instalar](#instalar-la-app) · [Qué hace](#qué-hace) · [Apoya el proyecto](#apoya-el-proyecto)
 
 ## Qué hace
 
@@ -41,6 +65,11 @@ La app tiene dos partes separadas:
 - **Avisos de versiones nuevas**: la app consulta GitHub, muestra las novedades y descarga e instala la actualización desde dentro.
 
 ### Diseño
+<p align="center">
+  <img src="docs/screenshots/turnos-oscuro.png" width="30%" alt="Calendario de turnos en modo oscuro">
+  <img src="docs/screenshots/resumen-oscuro.png" width="30%" alt="Resumen en modo oscuro">
+</p>
+
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
 - Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.
 
