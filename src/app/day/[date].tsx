@@ -5,7 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { TypePicker } from '@/components/TypePicker';
 import { Card } from '@/components/ui';
 import { formatLong } from '@/lib/dates';
-import { formatDuration, resolveEntry } from '@/lib/hours';
+import { byStart, formatDuration, resolveEntry, type Resolved } from '@/lib/hours';
 import { entryFromType, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 
@@ -15,7 +15,11 @@ export default function DayScreen() {
   const { state, saveEntry, deleteEntry } = useStore();
   const types = new Map(state.types.map((x) => [x.id, x]));
   const jobs = new Map(state.jobs.map((j) => [j.id, j]));
-  const entries = state.entries.filter((e) => e.date === date);
+  const entries = state.entries
+    .filter((e) => e.date === date)
+    .map((e) => resolveEntry(e, types, jobs))
+    .filter((r): r is Resolved => r !== null)
+    .sort(byStart);
 
   // Tapping a shift type opens the editor with its hours so they can be adjusted before saving.
   const addType = (typeId: string) => {
@@ -32,9 +36,8 @@ export default function DayScreen() {
       {entries.length === 0 && <Text style={{ color: t.sub, textAlign: 'center', marginBottom: 16 }}>Sin turnos este día.</Text>}
 
       <View style={{ gap: 10 }}>
-        {entries.map((entry) => {
-          const r = resolveEntry(entry, types, jobs);
-          if (!r) return null;
+        {entries.map((r) => {
+          const entry = r.entry;
           return (
             <Card key={entry.id} style={styles.entry}>
               <Pressable

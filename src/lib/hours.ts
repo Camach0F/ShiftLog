@@ -75,6 +75,9 @@ export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, j
   };
 }
 
+/** Orders a day's entries by the time they start. */
+export const byStart = (a: Resolved, b: Resolved) => a.start.localeCompare(b.start);
+
 export type TypeTotals = { key: string; name: string; color: string; job: Job; count: number; minutes: number; pay: number };
 export type JobTotals = { job: Job; minutes: number; pay: number; overtimeMinutes: number; worked: number };
 

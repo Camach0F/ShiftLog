@@ -84,7 +84,7 @@ export function MonthGrid({
 export function Pill({ label, color }: { label: string; color: string }) {
   return (
     <View style={[styles.pill, { backgroundColor: color }]}>
-      <Text numberOfLines={1} style={styles.pillText}>
+      <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7} style={styles.pillText}>
         {label}
       </Text>
     </View>

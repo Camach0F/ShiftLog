@@ -6,7 +6,7 @@ import { MonthGrid, Pill } from '@/components/MonthGrid';
 import { TypePicker } from '@/components/TypePicker';
 import { Button, Card } from '@/components/ui';
 import { todayKey } from '@/lib/dates';
-import { formatDuration, formatMoney, resolveEntry, summarize } from '@/lib/hours';
+import { byStart, formatDuration, formatMoney, resolveEntry, summarize, type Resolved } from '@/lib/hours';
 import { entryFromType, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 import type { ShiftEntry } from '@/lib/types';
@@ -95,14 +95,16 @@ export default function ShiftsScreen() {
             </Pressable>
           }
           renderDay={(key) => {
-            const entries = entriesByDay.get(key) ?? [];
+            const list = (entriesByDay.get(key) ?? [])
+              .map((e) => resolveEntry(e, typesById, jobsById))
+              .filter((r): r is Resolved => r !== null)
+              .sort(byStart);
             return (
               <>
-                {entries.slice(0, 3).map((e) => {
-                  const r = resolveEntry(e, typesById, jobsById);
-                  return r ? <Pill key={e.id} label={r.name} color={r.color} /> : null;
-                })}
-                {entries.length > 3 && <Text style={{ color: t.sub, fontSize: 10 }}>+{entries.length - 3}</Text>}
+                {list.slice(0, 3).map((r) => (
+                  <Pill key={r.entry.id} label={r.job.name} color={r.color} />
+                ))}
+                {list.length > 3 && <Text style={{ color: t.sub, fontSize: 10 }}>+{list.length - 3}</Text>}
               </>
             );
           }}
