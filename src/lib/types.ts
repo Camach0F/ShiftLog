@@ -32,6 +32,19 @@ export type ShiftType = {
   hourlyRate: number | null;
 };
 
+/** A shift type as stored inside a job template (the ids are created when a job is made from it). */
+export type TemplateShift = Omit<ShiftType, 'id' | 'jobId'>;
+
+/** A ready-made job: its settings and shift types, used to create new jobs quickly. */
+export type JobTemplate = {
+  id: string;
+  name: string;
+  color: string;
+  hourlyRate: number | null;
+  overtime: Overtime;
+  shifts: TemplateShift[];
+};
+
 export type ShiftEntry = {
   id: string;
   /** "YYYY-MM-DD" in local time */
@@ -87,6 +100,7 @@ export type AppState = {
   types: ShiftType[];
   entries: ShiftEntry[];
   rotations: Rotation[];
+  templates: JobTemplate[];
   events: AgendaEvent[];
   settings: Settings;
 };

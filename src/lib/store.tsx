@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 
-import type { AgendaEvent, AppState, Job, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
+import type { AgendaEvent, AppState, Job, JobTemplate, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
 
 const STORAGE_KEY = 'shiftlog:v1';
 
@@ -23,6 +23,7 @@ const initialState: AppState = {
   types: [],
   entries: [],
   rotations: [],
+  templates: [],
   events: [],
   settings: { currency: '€', weekStartsOn: 1, quickAdd: false },
 };
@@ -38,6 +39,8 @@ type Action =
   | { type: 'deleteType'; id: string }
   | { type: 'saveRotation'; rotation: Rotation }
   | { type: 'deleteRotation'; id: string }
+  | { type: 'saveTemplate'; template: JobTemplate }
+  | { type: 'deleteTemplate'; id: string }
   | { type: 'saveEvent'; event: AgendaEvent }
   | { type: 'deleteEvent'; id: string }
   | { type: 'setSettings'; settings: Partial<Settings> };
@@ -86,6 +89,10 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, rotations: upsert(state.rotations, action.rotation) };
     case 'deleteRotation':
       return { ...state, rotations: state.rotations.filter((r) => r.id !== action.id) };
+    case 'saveTemplate':
+      return { ...state, templates: upsert(state.templates, action.template) };
+    case 'deleteTemplate':
+      return { ...state, templates: state.templates.filter((t) => t.id !== action.id) };
     case 'saveEvent':
       return { ...state, events: upsert(state.events, action.event) };
     case 'deleteEvent':
@@ -107,6 +114,8 @@ type Store = {
   deleteType: (id: string) => void;
   saveRotation: (rotation: Rotation) => void;
   deleteRotation: (id: string) => void;
+  saveTemplate: (template: JobTemplate) => void;
+  deleteTemplate: (id: string) => void;
   saveEvent: (event: AgendaEvent) => void;
   deleteEvent: (id: string) => void;
   setSettings: (settings: Partial<Settings>) => void;
@@ -183,6 +192,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       deleteType: (id) => dispatch({ type: 'deleteType', id }),
       saveRotation: (rotation) => dispatch({ type: 'saveRotation', rotation }),
       deleteRotation: (id) => dispatch({ type: 'deleteRotation', id }),
+      saveTemplate: (template) => dispatch({ type: 'saveTemplate', template }),
+      deleteTemplate: (id) => dispatch({ type: 'deleteTemplate', id }),
       saveEvent: (event) => dispatch({ type: 'saveEvent', event }),
       deleteEvent: (id) => dispatch({ type: 'deleteEvent', id }),
       setSettings: (settings) => dispatch({ type: 'setSettings', settings }),

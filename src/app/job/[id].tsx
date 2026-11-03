@@ -3,11 +3,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
-import { Button, Card, Field } from '@/components/ui';
+import { Button, Card, Chip, Field } from '@/components/ui';
 import { formatDuration, shiftMinutes } from '@/lib/hours';
 import { defaultOvertime, newId, useStore } from '@/lib/store';
+import { BUILT_IN_TEMPLATES, isBuiltIn, templateFromJob } from '@/lib/templates';
 import { TYPE_COLORS, useTheme } from '@/lib/theme';
-import type { Overtime } from '@/lib/types';
+import type { JobTemplate, Overtime, TemplateShift } from '@/lib/types';
 
 /** Optional positive number: empty commits null, an unparsable value commits nothing. */
 function LimitField({ label, value, onCommit }: { label: string; value: number | null; onCommit: (v: number | null) => void }) {
@@ -28,10 +29,13 @@ function LimitField({ label, value, onCommit }: { label: string; value: number |
   );
 }
 
+const hoursLabel = (s: { start: string; end: string; breakMin: number }) =>
+  s.start === s.end ? 'Sin horas' : `${s.start} – ${s.end} · ${formatDuration(shiftMinutes(s.start, s.end, s.breakMin))}`;
+
 export default function JobScreen() {
   const t = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { state, saveJob, deleteJob } = useStore();
+  const { state, saveJob, deleteJob, saveType, saveTemplate, deleteTemplate } = useStore();
   const existing = state.jobs.find((j) => j.id === id);
   const types = existing ? state.types.filter((x) => x.jobId === existing.id) : [];
 
@@ -40,11 +44,42 @@ export default function JobScreen() {
   const [rate, setRate] = useState(existing?.hourlyRate != null ? String(existing.hourlyRate) : '');
   const [overtime, setOvertime] = useState<Overtime>(existing?.overtime ?? defaultOvertime);
   const [multiplier, setMultiplier] = useState(String(overtime.multiplier));
+  // New jobs only: shift types that will be created with the job, and whether to remember it.
+  const [pending, setPending] = useState<TemplateShift[]>([]);
+  const [remember, setRemember] = useState(true);
+  // Bumped when a template fills the form, so the uncontrolled limit fields pick up its values.
+  const [applied, setApplied] = useState(0);
+
+  const templates = [...BUILT_IN_TEMPLATES, ...state.templates];
+
+  const applyTemplate = (template: JobTemplate) => {
+    setName(template.name);
+    setColor(template.color);
+    setRate(template.hourlyRate != null ? String(template.hourlyRate) : '');
+    setOvertime(template.overtime);
+    setMultiplier(String(template.overtime.multiplier));
+    setPending(template.shifts);
+    setApplied((n) => n + 1);
+  };
+
+  const confirmDeleteTemplate = (template: JobTemplate) => {
+    if (isBuiltIn(template)) return;
+    Alert.alert('Borrar plantilla', `¿Borrar la plantilla "${template.name}"? Los trabajos ya creados no cambian.`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Borrar', style: 'destructive', onPress: () => deleteTemplate(template.id) },
+    ]);
+  };
 
   const rateNum = rate.trim() === '' ? null : Number(rate.replace(',', '.'));
   const multiplierNum = Number(multiplier.replace(',', '.'));
   const valid =
     name.trim() !== '' && (rateNum === null || (!Number.isNaN(rateNum) && rateNum >= 0)) && !Number.isNaN(multiplierNum) && multiplierNum >= 1;
+
+  /** Saves over a template with the same name instead of piling up copies. */
+  const rememberAs = (template: Omit<JobTemplate, 'id'>) => {
+    const same = state.templates.find((x) => x.name.toLowerCase() === template.name.toLowerCase());
+    saveTemplate({ ...template, id: same?.id ?? newId() });
+  };
 
   const save = () => {
     if (!valid) {
@@ -59,9 +94,20 @@ export default function JobScreen() {
       overtime: { ...overtime, multiplier: multiplierNum },
     };
     saveJob(job);
-    // A new job continues on its own page so its shift types can be added right away.
-    if (existing) router.back();
-    else router.replace({ pathname: '/job/[id]', params: { id: job.id } });
+    if (existing) {
+      router.back();
+      return;
+    }
+    for (const shift of pending) saveType({ ...shift, id: newId(), jobId: job.id });
+    if (remember) rememberAs({ name: job.name, color: job.color, hourlyRate: job.hourlyRate, overtime: job.overtime, shifts: pending });
+    // A new job continues on its own page so more shift types can be added right away.
+    router.replace({ pathname: '/job/[id]', params: { id: job.id } });
+  };
+
+  const saveAsTemplate = () => {
+    if (!existing) return;
+    rememberAs(templateFromJob(existing, types));
+    Alert.alert('Plantilla guardada', `«${existing.name}» está disponible al crear un trabajo nuevo.`);
   };
 
   const remove = () => {
@@ -87,6 +133,26 @@ export default function JobScreen() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {!existing && (
+          <>
+            <Text style={[styles.section, { color: t.sub }]}>EMPEZAR DESDE UNA PLANTILLA</Text>
+            <View style={styles.chips}>
+              {templates.map((template) => (
+                <Chip
+                  key={template.id}
+                  label={template.name}
+                  color={template.color}
+                  onPress={() => applyTemplate(template)}
+                  onLongPress={() => confirmDeleteTemplate(template)}
+                />
+              ))}
+            </View>
+            <Text style={{ color: t.sub, fontSize: 12, marginTop: 8, marginBottom: 18 }}>
+              Rellena el nombre, la tarifa y los turnos para que no tengas que escribirlos de nuevo. Mantén pulsada una plantilla tuya para borrarla.
+            </Text>
+          </>
+        )}
+
         <Field label="Nombre" value={name} onChangeText={setName} placeholder="Restaurante, Hospital, Cliente X…" />
 
         <Text style={[styles.label, { color: t.sub }]}>Color</Text>
@@ -119,8 +185,18 @@ export default function JobScreen() {
           {overtime.enabled && (
             <View style={{ marginTop: 14 }}>
               <View style={styles.pair}>
-                <LimitField label="Límite diario (h)" value={overtime.dailyHours} onCommit={(dailyHours) => setOvertime((o) => ({ ...o, dailyHours }))} />
-                <LimitField label="Límite semanal (h)" value={overtime.weeklyHours} onCommit={(weeklyHours) => setOvertime((o) => ({ ...o, weeklyHours }))} />
+                <LimitField
+                  key={`d${applied}`}
+                  label="Límite diario (h)"
+                  value={overtime.dailyHours}
+                  onCommit={(dailyHours) => setOvertime((o) => ({ ...o, dailyHours }))}
+                />
+                <LimitField
+                  key={`w${applied}`}
+                  label="Límite semanal (h)"
+                  value={overtime.weeklyHours}
+                  onCommit={(weeklyHours) => setOvertime((o) => ({ ...o, weeklyHours }))}
+                />
               </View>
               <Field label="Multiplicador de pago (1.5 = +50%)" value={multiplier} onChangeText={setMultiplier} keyboardType="decimal-pad" />
               <Text style={{ color: t.sub, fontSize: 12 }}>
@@ -144,9 +220,7 @@ export default function JobScreen() {
                     <View style={[styles.dot, { backgroundColor: type.color }]} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{type.name}</Text>
-                      <Text style={{ color: t.sub }}>
-                        {type.start === type.end ? 'Sin horas' : `${type.start} – ${type.end} · ${formatDuration(shiftMinutes(type.start, type.end, type.breakMin))}`}
-                      </Text>
+                      <Text style={{ color: t.sub }}>{hoursLabel(type)}</Text>
                     </View>
                     <Ionicons name="chevron-forward" size={18} color={t.sub} />
                   </Pressable>
@@ -159,12 +233,44 @@ export default function JobScreen() {
               onPress={() => router.push({ pathname: '/type/[id]', params: { id: 'new', jobId: existing.id } })}
             />
           </>
+        ) : pending.length > 0 ? (
+          <>
+            <Card style={{ padding: 0 }}>
+              {pending.map((shift, i) => (
+                <View
+                  key={`${shift.name}-${i}`}
+                  style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
+                >
+                  <View style={[styles.dot, { backgroundColor: shift.color }]} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{shift.name}</Text>
+                    <Text style={{ color: t.sub }}>{hoursLabel(shift)}</Text>
+                  </View>
+                  <Pressable accessibilityLabel={`Quitar ${shift.name}`} hitSlop={10} onPress={() => setPending((p) => p.filter((_, j) => j !== i))}>
+                    <Ionicons name="close-circle" size={22} color={t.sub} />
+                  </Pressable>
+                </View>
+              ))}
+            </Card>
+            <Text style={{ color: t.sub, fontSize: 12, marginTop: 8 }}>Se crearán al guardar el trabajo. Podrás editarlos después.</Text>
+          </>
         ) : (
-          <Text style={{ color: t.sub }}>Guarda el trabajo para poder añadirle tipos de turno.</Text>
+          <Text style={{ color: t.sub }}>Guarda el trabajo para poder añadirle tipos de turno, o elige antes una plantilla.</Text>
+        )}
+
+        {!existing && (
+          <View style={[styles.switchRow, { marginTop: 24 }]}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: t.text, fontSize: 16 }}>Recordar como plantilla</Text>
+              <Text style={{ color: t.sub, fontSize: 12 }}>Para crear otro igual sin volver a escribir el nombre.</Text>
+            </View>
+            <Switch value={remember} onValueChange={setRemember} />
+          </View>
         )}
 
         <View style={{ marginTop: 28, gap: 10 }}>
           <Button label="Guardar" onPress={save} />
+          {existing && <Button label="Guardar como plantilla" variant="secondary" onPress={saveAsTemplate} />}
           {existing && <Button label="Eliminar trabajo" variant="danger" onPress={remove} />}
         </View>
       </ScrollView>
@@ -176,6 +282,7 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 48, maxWidth: 700, width: '100%', alignSelf: 'center' },
   label: { fontSize: 13, marginBottom: 8 },
   section: { fontSize: 12, marginBottom: 8, marginLeft: 4 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
   swatch: { width: 36, height: 36, borderRadius: 18, borderWidth: 3 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },

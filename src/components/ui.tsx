@@ -45,11 +45,24 @@ export function Field({ label, ...input }: { label: string } & TextInputProps) {
   );
 }
 
-export function Chip({ label, color, selected, onPress }: { label: string; color: string; selected?: boolean; onPress: () => void }) {
+export function Chip({
+  label,
+  color,
+  selected,
+  onPress,
+  onLongPress,
+}: {
+  label: string;
+  color: string;
+  selected?: boolean;
+  onPress: () => void;
+  onLongPress?: () => void;
+}) {
   const t = useTheme();
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       style={[styles.chip, { borderColor: color, backgroundColor: selected ? color : 'transparent' }]}
     >
       <Text style={{ color: selected ? '#FFFFFF' : t.text, fontWeight: '600' }}>{label}</Text>
