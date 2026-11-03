@@ -2,7 +2,7 @@
 
 App para **Android** que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
 
-Hecha con [Expo](https://expo.dev) (React Native + TypeScript) y Expo Router, solo para Android (móviles y tablets). Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
+Hecha con React Native y TypeScript, solo para Android (móviles y tablets). Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
 
 ## Qué hace
 
@@ -79,7 +79,7 @@ Para instalarlo en un móvil Android hay que permitir «instalar apps de orígen
 
 ```
 src/
-  app/            Pantallas (Expo Router)
+  app/            Pantallas
     (tabs)/       Agenda, Turnos, Resumen y Trabajos
     day/ entry/ event/ job/ type/ rotation/   Pantallas modales
   components/     Cuadrícula del mes, selector de turnos, controles
