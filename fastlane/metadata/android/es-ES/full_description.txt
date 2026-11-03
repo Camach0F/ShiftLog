@@ -1,0 +1,19 @@
+<b>ShiftLog</b> combina una <b>agenda personal</b> con el <b>registro de turnos de trabajo</b>: apunta qué trabajas cada día y calcula las horas, las horas extra y, si quieres, los ingresos.
+
+Es gratuita, sin anuncios, sin cuentas y de código abierto. Todo está desbloqueado.
+
+<b>Trabajos y turnos</b>
+• Varios trabajos con color y forma de cobro: por horas (con horas extra) o por trabajo (precio fijo).
+• Tipos de turno con descanso opcional, que puedes ajustar cada día.
+• Varios turnos el mismo día, plantillas de trabajo, rotaciones y edición múltiple.
+
+<b>Horas y resumen</b>
+• Resumen por semana, mes o año, con desglose por trabajo y por turno.
+• Exportación a PDF y CSV.
+
+<b>Agenda</b>
+• Eventos de todo el día o con horas y plantillas de evento. No cuentan en las horas.
+
+<b>Tus datos son tuyos</b>
+• Se guardan en tu dispositivo. Copia de seguridad opcional en tu propio Google Drive (carpeta oculta, solo ShiftLog puede verla).
+• Modo claro y oscuro, adaptada a móvil y tablet.

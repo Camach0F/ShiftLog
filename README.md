@@ -82,11 +82,29 @@ En tablet y pantallas anchas aparece una barra lateral y el calendario se muestr
 
 ## Instalar la app
 
-1. Descarga el último `ShiftLog-x.y.z.apk` desde [Releases](https://github.com/Camach0F/ShiftLog/releases/latest) en tu móvil o tablet Android.
+<table>
+<tr>
+<td width="200" align="center">
+  <img src="docs/qr-descarga.png" width="180" alt="Código QR de descarga"><br>
+  <sub>Escanéalo con el móvil</sub>
+</td>
+<td>
+
+1. Descarga el APK desde [Releases](https://github.com/Camach0F/ShiftLog/releases/latest) en tu móvil o tablet Android. Enlace directo: [`ShiftLog.apk`](https://github.com/Camach0F/ShiftLog/releases/latest/download/ShiftLog.apk) (siempre la última versión).
 2. Ábrelo y, si Android lo pide, permite «instalar apps de orígenes desconocidos» para el navegador o el gestor de archivos que uses.
-3. Para actualizar, la propia app avisa cuando hay una versión nueva en Releases y la descarga e instala desde **Ajustes → Actualizaciones** (Android te pide confirmar). También puedes instalar el APK nuevo encima a mano: se conservan tus datos.
+3. Para actualizar, la propia app avisa cuando hay una versión nueva y la descarga e instala desde **Ajustes → Actualizaciones** (Android te pide confirmar). Se conservan tus datos.
+
+</td>
+</tr>
+</table>
 
 Los APK los compila y firma GitHub Actions a partir de este código, así que el archivo de Releases es el que sale del repositorio. Requiere Android 7 o superior.
+
+### Con Obtainium
+[Obtainium](https://github.com/ImranR98/Obtainium) instala y actualiza apps directamente desde GitHub: pulsa **Añadir app**, pega `https://github.com/Camach0F/ShiftLog` y listo. Recibirás los avisos de versiones nuevas desde ahí.
+
+### Compartirla
+Dentro de la app, en **Ajustes → Compartir**, hay un botón que envía el enlace de descarga por WhatsApp, Telegram, correo o lo que prefieras.
 
 ## Apoya el proyecto
 

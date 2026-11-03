@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { BackupCard } from '@/components/BackupCard';
 import { UpdateCard } from '@/components/UpdateCard';
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
+
+const SHARE_MESSAGE =
+  'ShiftLog: agenda y turnos de trabajo para Android. Gratis, sin anuncios y de código abierto.\nDescárgala aquí: https://github.com/Camach0F/ShiftLog/releases/latest';
 
 export default function JobsScreen() {
   const t = useTheme();
@@ -132,6 +135,15 @@ export default function JobsScreen() {
           </View>
           <Switch value={checkUpdates} onValueChange={(v) => setSettings({ checkUpdates: v })} />
         </View>
+      </Card>
+
+      <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>COMPARTIR</Text>
+      <Card>
+        <Text style={{ color: t.text, fontSize: 16 }}>¿Te gusta ShiftLog?</Text>
+        <Text style={{ color: t.sub, fontSize: 12, marginTop: 2, marginBottom: 10 }}>
+          Envía el enlace de descarga a quien pueda necesitarla.
+        </Text>
+        <Button label="Compartir ShiftLog" variant="secondary" onPress={() => Share.share({ message: SHARE_MESSAGE }).catch(() => {})} />
       </Card>
     </ScrollView>
   );
