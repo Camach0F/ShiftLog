@@ -18,7 +18,11 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Calendario', tabBarIcon: ({ focused, size }) => <Ionicons name="calendar" color={focused ? t.accent : t.sub} size={size} /> }}
+        options={{ title: 'Agenda', tabBarIcon: ({ focused, size }) => <Ionicons name="calendar" color={focused ? t.accent : t.sub} size={size} /> }}
+      />
+      <Tabs.Screen
+        name="shifts"
+        options={{ title: 'Turnos', tabBarIcon: ({ focused, size }) => <Ionicons name="time" color={focused ? t.accent : t.sub} size={size} /> }}
       />
       <Tabs.Screen
         name="summary"

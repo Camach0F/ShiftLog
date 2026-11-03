@@ -44,6 +44,24 @@ export type ShiftEntry = {
   breakMin?: number;
 };
 
+/**
+ * A personal agenda item (appointment, reminder, birthday...). Unlike shifts, events never
+ * count towards hours, pay, summaries or exports.
+ */
+export type AgendaEvent = {
+  id: string;
+  /** "YYYY-MM-DD" in local time */
+  date: string;
+  title: string;
+  allDay: boolean;
+  /** "HH:mm"; only meaningful when allDay is false */
+  start: string;
+  /** "HH:mm"; only meaningful when allDay is false */
+  end: string;
+  note: string;
+  color: string;
+};
+
 export type Settings = {
   currency: string;
   /** 0 = Sunday, 1 = Monday */
@@ -62,5 +80,6 @@ export type AppState = {
   types: ShiftType[];
   entries: ShiftEntry[];
   rotations: Rotation[];
+  events: AgendaEvent[];
   settings: Settings;
 };

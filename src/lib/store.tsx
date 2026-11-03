@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 
-import type { AppState, Job, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
+import type { AgendaEvent, AppState, Job, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
 
 const STORAGE_KEY = 'shiftlog:v1';
 
@@ -14,6 +14,7 @@ const initialState: AppState = {
   types: [],
   entries: [],
   rotations: [],
+  events: [],
   settings: { currency: '€', weekStartsOn: 1 },
 };
 
@@ -28,6 +29,8 @@ type Action =
   | { type: 'deleteType'; id: string }
   | { type: 'saveRotation'; rotation: Rotation }
   | { type: 'deleteRotation'; id: string }
+  | { type: 'saveEvent'; event: AgendaEvent }
+  | { type: 'deleteEvent'; id: string }
   | { type: 'setSettings'; settings: Partial<Settings> };
 
 const upsert = <T extends { id: string }>(list: T[], item: T) =>
@@ -68,6 +71,10 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, rotations: upsert(state.rotations, action.rotation) };
     case 'deleteRotation':
       return { ...state, rotations: state.rotations.filter((r) => r.id !== action.id) };
+    case 'saveEvent':
+      return { ...state, events: upsert(state.events, action.event) };
+    case 'deleteEvent':
+      return { ...state, events: state.events.filter((e) => e.id !== action.id) };
     case 'setSettings':
       return { ...state, settings: { ...state.settings, ...action.settings } };
   }
@@ -85,6 +92,8 @@ type Store = {
   deleteType: (id: string) => void;
   saveRotation: (rotation: Rotation) => void;
   deleteRotation: (id: string) => void;
+  saveEvent: (event: AgendaEvent) => void;
+  deleteEvent: (id: string) => void;
   setSettings: (settings: Partial<Settings>) => void;
 };
 
@@ -149,6 +158,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       deleteType: (id) => dispatch({ type: 'deleteType', id }),
       saveRotation: (rotation) => dispatch({ type: 'saveRotation', rotation }),
       deleteRotation: (id) => dispatch({ type: 'deleteRotation', id }),
+      saveEvent: (event) => dispatch({ type: 'saveEvent', event }),
+      deleteEvent: (id) => dispatch({ type: 'deleteEvent', id }),
       setSettings: (settings) => dispatch({ type: 'setSettings', settings }),
     }),
     [state, ready],
