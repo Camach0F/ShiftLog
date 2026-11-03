@@ -1,12 +1,14 @@
 import { File, Paths } from 'expo-file-system';
+import { Platform } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { formatDuration, formatMoney, resolveEntry, summarize } from './hours';
+import { fromKey } from './dates';
+import { resolveEntry, summarize } from './hours';
 import type { AppState } from './types';
 
 type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
-type Row = { date: string; job: string; name: string; start: string; end: string; breakMin: number; minutes: number; pay: number; note: string };
+type Row = { date: string; job: string; color: string; name: string; start: string; end: string; breakMin: number; minutes: number; pay: number; note: string };
 
 function rowsFor(data: Data, from: string, to: string, jobId: string | null): Row[] {
   const types = new Map(data.types.map((t) => [t.id, t]));
@@ -18,6 +20,7 @@ function rowsFor(data: Data, from: string, to: string, jobId: string | null): Ro
     rows.push({
       date: e.date,
       job: r.job.name,
+      color: r.job.color,
       name: r.type?.name ?? 'Horario propio',
       start: r.start,
       end: r.end,
@@ -46,48 +49,74 @@ export function buildCsv(data: Data, from: string, to: string, jobId: string | n
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+/** "7 h 30 min" / "8 h", the way the report writes durations. */
+const longDuration = (min: number) => {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m !== 0 ? `${h} h ${m} min` : `${h} h`;
+};
+
+/**
+ * A4 report: a title, then one row per day with a colored job label, the hours of each shift
+ * and how long it lasted, weekends highlighted, and the total at the bottom. No logo or branding.
+ */
 export function buildHtml(data: Data, from: string, to: string, label: string, jobId: string | null): string {
   const rows = rowsFor(data, from, to, jobId);
   const totals = summarize(data, from, to, jobId);
-  const { currency } = data.settings;
-  const showPay = totals.pay > 0;
-  const subtitle = jobId === null ? label : `${label} · ${data.jobs.find((j) => j.id === jobId)?.name ?? ''}`;
 
-  const body = rows
-    .map(
-      (r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.job)}</td><td>${esc(r.name)}</td><td>${r.start}–${r.end}</td><td>${r.breakMin} min</td><td class="n">${formatDuration(r.minutes)}</td>${
-        showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''
-      }<td>${esc(r.note)}</td></tr>`,
-    )
+  const byDay = new Map<string, Row[]>();
+  for (const r of rows) byDay.set(r.date, [...(byDay.get(r.date) ?? []), r]);
+
+  const days = [...byDay.entries()]
+    .map(([date, list]) => {
+      const d = fromKey(date);
+      const weekend = d.getDay() === 0 || d.getDay() === 6;
+      const entries = list
+        .map((r) => {
+          const hours = r.minutes > 0 ? `${r.start} - ${r.end}` : 'Sin horas';
+          return `<div class="entry"><span class="badge" style="background:${esc(r.color)}">${esc(r.job.toUpperCase())}</span><span class="time">${hours}</span><span class="dur">${longDuration(r.minutes)}</span></div>`;
+        })
+        .join('');
+      return `<div class="day${weekend ? ' weekend' : ''}"><div class="dn">${d.getDate()}</div><div class="dw">${WEEKDAYS[d.getDay()]}</div><div class="entries">${entries}</div></div>`;
+    })
     .join('');
 
-  const perJob = totals.jobRows
-    .map(
-      (r) =>
-        `<tr><td>${esc(r.job.name)}</td><td class="n">${r.worked}</td><td class="n">${formatDuration(r.minutes)}</td><td class="n">${
-          r.overtimeMinutes > 0 ? formatDuration(r.overtimeMinutes) : ''
-        }</td>${showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''}</tr>`,
-    )
-    .join('');
+  const perJob =
+    totals.jobRows.length > 1
+      ? `<div class="jobs">${totals.jobRows
+          .map((r) => `<div><span>${esc(r.job.name)}</span><span>${longDuration(r.minutes)}</span></div>`)
+          .join('')}</div>`
+      : '';
 
   return `<html><head><meta charset="utf-8" /><style>
-    body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #111; padding: 24px; }
-    h1 { margin: 0 0 4px; } h2 { margin-top: 28px; font-size: 16px; }
-    .sub { color: #666; margin-bottom: 16px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; }
-    .n { text-align: right; white-space: nowrap; }
-    .totals { font-size: 15px; margin: 12px 0; }
+    body { font-family: Helvetica, Arial, sans-serif; color: #171717; margin: 0; }
+    h1 { font-size: 22px; margin: 0 0 10px; }
+    .rule { height: 1.7px; background: #2F6BFF; }
+    .head { font-size: 8px; font-weight: bold; color: #2F6BFF; margin: 14px 0 8px; display: flex; }
+    .head span:first-child { width: 62px; }
+    .day { display: flex; align-items: flex-start; padding: 6px 5px; border-bottom: 0.6px solid #E1E1E3; page-break-inside: avoid; }
+    .weekend { background: #EEF2FF; }
+    .dn { width: 20px; font-weight: bold; font-size: 9.5px; }
+    .dw { width: 42px; font-size: 8px; color: #8B8B8F; padding-top: 1px; }
+    .entries { flex: 1; }
+    .entry { display: flex; align-items: center; height: 18px; font-size: 8.5px; color: #56565A; }
+    .badge { width: 110px; box-sizing: border-box; padding: 2px 6px; border-radius: 3px; color: #fff; font-size: 6px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 12px; }
+    .time { flex: 1; }
+    .dur { text-align: right; }
+    .empty { color: #8B8B8F; font-size: 9.5px; margin-top: 12px; }
+    .total { font-size: 11px; font-weight: bold; color: #2F6BFF; margin-top: 14px; }
+    .jobs { margin-top: 10px; font-size: 8.5px; color: #56565A; }
+    .jobs div { display: flex; justify-content: space-between; padding: 2px 0; }
   </style></head><body>
-    <h1>ShiftLog</h1>
-    <div class="sub">${esc(subtitle)}</div>
-    <div class="totals"><b>${formatDuration(totals.minutes)}</b> · ${totals.worked} turnos${
-      totals.overtimeMinutes > 0 ? ` · ${formatDuration(totals.overtimeMinutes)} extra` : ''
-    }${showPay ? ` · <b>${esc(formatMoney(totals.pay, currency))}</b>` : ''}</div>
-    <h2>Por trabajo</h2>
-    <table><tr><th>Trabajo</th><th class="n">Turnos</th><th class="n">Horas</th><th class="n">Extra</th>${showPay ? '<th class="n">Ingresos</th>' : ''}</tr>${perJob}</table>
-    <h2>Detalle</h2>
-    <table><tr><th>Fecha</th><th>Trabajo</th><th>Turno</th><th>Horario</th><th>Descanso</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}<th>Nota</th></tr>${body}</table>
+    <h1>${esc(label)}</h1>
+    <div class="rule"></div>
+    <div class="head"><span>DÍA</span><span>TRABAJO</span></div>
+    ${days || '<div class="empty">Sin turnos en este periodo.</div>'}
+    <div class="rule" style="margin-top: 11px"></div>
+    <div class="total">Total: ${longDuration(totals.minutes)}</div>
+    ${perJob}
   </body></html>`;
 }
 
@@ -103,7 +132,16 @@ export async function shareCsv(csv: string, label: string) {
   await shareFile(file.uri, 'text/csv', 'public.comma-separated-values-text');
 }
 
+// A4 in points. iOS takes real page margins; elsewhere the page padding stands in for them.
+const A4 = { width: 595, height: 842 };
+const MARGIN = 57;
+
 export async function sharePdf(html: string) {
-  const { uri } = await Print.printToFileAsync({ html });
+  const page = Platform.OS === 'ios' ? html : html.replace('</style>', `body { padding: ${MARGIN}px; }</style>`);
+  const { uri } = await Print.printToFileAsync({
+    html: page,
+    ...A4,
+    margins: { left: MARGIN, right: MARGIN, top: MARGIN, bottom: MARGIN },
+  });
   await shareFile(uri, 'application/pdf', 'com.adobe.pdf');
 }
