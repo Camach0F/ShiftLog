@@ -70,6 +70,13 @@ La app tiene dos partes separadas:
   <img src="docs/screenshots/resumen-oscuro.png" width="30%" alt="Resumen en modo oscuro">
 </p>
 
+En tablet y pantallas anchas aparece una barra lateral y el calendario se muestra más grande:
+
+<p align="center">
+  <img src="docs/screenshots/tablet-turnos.png" width="47%" alt="Calendario de turnos en tablet">
+  <img src="docs/screenshots/tablet-resumen.png" width="47%" alt="Resumen en tablet">
+</p>
+
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
 - Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.
 
