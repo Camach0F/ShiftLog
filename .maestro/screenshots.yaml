@@ -1,0 +1,105 @@
+# Fills the app with example data and takes the screenshots used in the README.
+# Days 8 to 22 are used because they never repeat in the month grid (the leading and trailing
+# days of the neighbouring months are 1-6 and 23-31).
+appId: com.camach0f.shiftlog
+---
+- launchApp:
+    clearState: true
+
+# Two jobs from templates
+- tapOn: "Trabajos"
+- tapOn: "Nuevo trabajo"
+- tapOn: "Turnos rotativos"
+- tapOn: "Sin tarifa"
+- inputText: "12"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Mañana"
+- pressKey: back
+- tapOn: "Nuevo trabajo"
+- tapOn: "Hostelería"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+
+# Shifts on the calendar
+- tapOn: "Turnos"
+- tapOn: "8"
+- tapOn: "Mañana"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "9"
+- tapOn: "Mañana"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "10"
+- tapOn: "Tarde"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "13"
+- tapOn: "Noche"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "14"
+- tapOn: "Cena"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "15"
+- tapOn: "Cena"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "16"
+- tapOn: "Comida"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "20"
+- tapOn: "Mañana"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "21"
+- tapOn: "Tarde"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- tapOn: "22"
+- tapOn: "Comida"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- takeScreenshot: shot-turnos
+
+# Agenda
+- tapOn: "Agenda"
+- tapOn: "Nuevo evento"
+- tapOn: "Médico"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- takeScreenshot: shot-agenda
+
+# Summary and jobs
+- tapOn: "Resumen"
+- takeScreenshot: shot-resumen
+- tapOn: "Trabajos"
+- takeScreenshot: shot-trabajos

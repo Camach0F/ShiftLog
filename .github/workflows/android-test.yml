@@ -5,6 +5,11 @@ name: Test on Android emulator
 # and the device log as artifacts.
 on:
   workflow_dispatch:
+    inputs:
+      screenshots:
+        description: Fill the app with example data and take the README screenshots
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -81,7 +86,7 @@ jobs:
           arch: x86_64
           profile: ${{ matrix.profile }}
           disable-animations: true
-          script: ./scripts/emulator-test.sh ${{ matrix.name }} app-release.apk
+          script: SCREENSHOTS=${{ inputs.screenshots && '1' || '0' }} ./scripts/emulator-test.sh ${{ matrix.name }} app-release.apk
 
       - uses: actions/upload-artifact@v4
         if: always()

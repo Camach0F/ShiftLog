@@ -22,7 +22,8 @@ fi
 
 status=0
 cd "$OUT/shots"
-maestro test --test-output-dir "$OUT/maestro-light" "$ROOT/.maestro/light.yaml" || status=$?
+if [ "${SCREENSHOTS:-}" = 1 ]; then FLOW=screenshots; else FLOW=light; fi
+maestro test --test-output-dir "$OUT/maestro-light" "$ROOT/.maestro/$FLOW.yaml" || status=$?
 adb shell cmd uimode night yes
 maestro test --test-output-dir "$OUT/maestro-dark" "$ROOT/.maestro/dark.yaml" || status=$?
 
