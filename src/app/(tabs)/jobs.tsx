@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { BackupCard } from '@/components/BackupCard';
 import { UpdateCard } from '@/components/UpdateCard';
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
@@ -112,6 +113,11 @@ export default function JobsScreen() {
           </View>
           <Switch value={quickAdd} onValueChange={(v) => setSettings({ quickAdd: v })} />
         </View>
+      </Card>
+
+      <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>COPIA DE SEGURIDAD</Text>
+      <Card>
+        <BackupCard />
       </Card>
 
       <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>ACTUALIZACIONES</Text>

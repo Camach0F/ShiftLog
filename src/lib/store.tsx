@@ -128,6 +128,8 @@ type Store = {
   saveEvent: (event: AgendaEvent) => void;
   deleteEvent: (id: string) => void;
   setSettings: (settings: Partial<Settings>) => void;
+  /** Replaces everything with data read from a backup */
+  restore: (data: Record<string, any>) => void;
 };
 
 const StoreContext = createContext<Store | null>(null);
@@ -222,6 +224,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       saveEvent: (event) => dispatch({ type: 'saveEvent', event }),
       deleteEvent: (id) => dispatch({ type: 'deleteEvent', id }),
       setSettings: (settings) => dispatch({ type: 'setSettings', settings }),
+      restore: (data) => dispatch({ type: 'load', state: migrate(data) }),
     }),
     [state, ready],
   );
