@@ -19,7 +19,6 @@ export default function TypeScreen() {
   const [end, setEnd] = useState(existing?.end ?? '17:00');
   const [hasBreak, setHasBreak] = useState((existing?.breakMin ?? 0) > 0);
   const [breakMin, setBreakMin] = useState(String(existing?.breakMin ?? 0));
-  const [rate, setRate] = useState(existing?.hourlyRate != null ? String(existing.hourlyRate) : '');
 
   if (!job) {
     return (
@@ -32,16 +31,15 @@ export default function TypeScreen() {
   const s = normalizeTime(start);
   const e = normalizeTime(end);
   const brk = hasBreak ? Number(breakMin) : 0;
-  const rateNum = rate.trim() === '' ? null : Number(rate.replace(',', '.'));
   const valid =
-    name.trim() !== '' && s !== null && e !== null && Number.isInteger(brk) && brk >= 0 && (rateNum === null || (!Number.isNaN(rateNum) && rateNum >= 0));
+    name.trim() !== '' && s !== null && e !== null && Number.isInteger(brk) && brk >= 0;
 
   const save = () => {
     if (!valid) {
-      Alert.alert('Datos no válidos', 'Revisa el nombre, las horas (HH:mm), el descanso y la tarifa.');
+      Alert.alert('Datos no válidos', 'Revisa el nombre, las horas (HH:mm) y el descanso.');
       return;
     }
-    saveType({ id: existing?.id ?? newId(), jobId: job.id, name: name.trim(), start: s, end: e, breakMin: brk, hourlyRate: rateNum });
+    saveType({ id: existing?.id ?? newId(), jobId: job.id, name: name.trim(), start: s, end: e, breakMin: brk });
     router.back();
   };
 
@@ -90,14 +88,6 @@ export default function TypeScreen() {
             setBreakMin(minutes);
           }}
         />
-        <Field
-          label={`Tarifa por hora (${state.settings.currency}) — opcional`}
-          value={rate}
-          onChangeText={setRate}
-          keyboardType="decimal-pad"
-          placeholder={job.hourlyRate != null ? `Como el trabajo (${job.hourlyRate})` : 'Sin tarifa'}
-        />
-
         <Text style={{ color: t.text, fontSize: 16, fontWeight: '600', marginVertical: 8 }}>
           Duración: {s && e && Number.isInteger(brk) ? formatDuration(shiftMinutes(s, e, brk)) : '—'}
         </Text>

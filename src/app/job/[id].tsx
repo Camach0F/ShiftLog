@@ -98,7 +98,7 @@ export default function JobScreen() {
       router.back();
       return;
     }
-    for (const shift of pending) saveType({ ...shift, id: newId(), jobId: job.id });
+    for (const { name, start, end, breakMin } of pending) saveType({ id: newId(), jobId: job.id, name, start, end, breakMin });
     if (remember) rememberAs({ name: job.name, color: job.color, hourlyRate: job.hourlyRate, overtime: job.overtime, shifts: pending });
     // A new job continues on its own page so more shift types can be added right away.
     router.replace({ pathname: '/job/[id]', params: { id: job.id } });
@@ -174,7 +174,7 @@ export default function JobScreen() {
           keyboardType="decimal-pad"
           placeholder="Sin tarifa"
         />
-        <Text style={{ color: t.sub, fontSize: 12, marginBottom: 16 }}>Cada tipo de turno puede usar otra tarifa si lo necesitas.</Text>
+        <Text style={{ color: t.sub, fontSize: 12, marginBottom: 16 }}>Es la misma para todos los turnos de este trabajo.</Text>
 
         <Text style={[styles.section, { color: t.sub }]}>HORAS EXTRA</Text>
         <Card>

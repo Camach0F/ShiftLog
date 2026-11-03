@@ -8,12 +8,12 @@ export type Overtime = {
   multiplier: number;
 };
 
-/** An employer, client or workplace; owns its shift types, default pay rate and overtime rules. */
+/** An employer, client or workplace; owns its shift types, pay rate and overtime rules. */
 export type Job = {
   id: string;
   name: string;
   color: string;
-  /** Default hourly rate for the job's shift types; null = no pay tracking */
+  /** Hourly rate, the same for every shift of the job; null = no pay tracking */
   hourlyRate: number | null;
   overtime: Overtime;
 };
@@ -27,8 +27,6 @@ export type ShiftType = {
   /** "HH:mm"; an end earlier than the start means the shift crosses midnight */
   end: string;
   breakMin: number;
-  /** Overrides the job's hourly rate; null = use the job's rate */
-  hourlyRate: number | null;
 };
 
 /** A shift type as stored inside a job template (the ids are created when a job is made from it). */

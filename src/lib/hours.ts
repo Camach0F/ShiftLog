@@ -33,9 +33,6 @@ export function formatDuration(min: number): string {
 
 export const formatMoney = (amount: number, currency: string) => `${amount.toFixed(2)} ${currency}`;
 
-/** Hourly rate of a shift type: its own override, else the job's, else none. */
-export const rateFor = (type: ShiftType, job: Job | undefined) => type.hourlyRate ?? job?.hourlyRate ?? null;
-
 const FALLBACK = { start: '09:00', end: '17:00', breakMin: 0 };
 
 /** A calendar entry with everything it inherits from its job and shift type filled in. */
@@ -71,7 +68,7 @@ export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, j
     end,
     breakMin,
     minutes: shiftMinutes(start, end, breakMin),
-    rate: type ? rateFor(type, job) : job.hourlyRate,
+    rate: job.hourlyRate,
   };
 }
 

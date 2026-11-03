@@ -6,7 +6,6 @@ const shift = (name: string, start: string, end: string, breakMin: number) => ({
   start,
   end,
   breakMin,
-  hourlyRate: null,
 });
 
 const base = { hourlyRate: null, overtime: defaultOvertime };
@@ -51,7 +50,7 @@ export function templateFromJob(job: Job, types: ShiftType[], id: string = newId
     color: job.color,
     hourlyRate: job.hourlyRate,
     overtime: job.overtime,
-    shifts: types.map(({ name, start, end, breakMin, hourlyRate }) => ({ name, start, end, breakMin, hourlyRate })),
+    shifts: types.map(({ name, start, end, breakMin }) => ({ name, start, end, breakMin })),
   };
 }
 

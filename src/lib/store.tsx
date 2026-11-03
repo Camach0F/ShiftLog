@@ -159,8 +159,15 @@ function migrate(saved: Record<string, any>): AppState {
     ];
     state.types = state.types.map((t) => ({ ...t, jobId: 'default' }));
   }
-  // Shift types used to carry a color of their own; the job's color is used now.
-  state.types = state.types.map(({ color: _color, ...type }: ShiftType & { color?: string }) => type);
+  // Shift types used to carry a color and an hourly rate of their own; now both belong to the job.
+  // A job without a rate takes the first one set on its shift types, so existing pay is not lost.
+  type OldType = ShiftType & { color?: string; hourlyRate?: number | null };
+  const oldTypes = state.types as OldType[];
+  state.jobs = state.jobs.map((job) => ({
+    ...job,
+    hourlyRate: job.hourlyRate ?? oldTypes.find((x) => x.jobId === job.id && x.hourlyRate != null)?.hourlyRate ?? null,
+  }));
+  state.types = oldTypes.map(({ color: _color, hourlyRate: _rate, ...type }) => type);
   // Entries used to belong to a job only through their shift type.
   const jobOfType = new Map(state.types.map((t) => [t.id, t.jobId]));
   state.entries = state.entries
