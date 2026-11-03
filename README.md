@@ -79,4 +79,6 @@ El cálculo de horas, las horas extra y la migración de datos antiguos viven en
 
 ## Licencia
 
-Todos los derechos reservados. Consulta [LICENSE](LICENSE).
+Código abierto bajo la licencia [MIT](LICENSE). Puedes usarlo, modificarlo y distribuirlo libremente manteniendo el aviso de copyright.
+
+Es un proyecto independiente: no está afiliado a ninguna otra app de turnos ni reutiliza su nombre, textos o diseño.
