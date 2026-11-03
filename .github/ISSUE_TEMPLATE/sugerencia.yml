@@ -1,0 +1,11 @@
+name: Sugerencia
+description: Una idea para mejorar la app
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Qué te gustaría que hiciera
+      description: Explica qué necesitas y para qué lo usarías.
+    validations:
+      required: true

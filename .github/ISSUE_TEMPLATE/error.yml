@@ -1,0 +1,26 @@
+name: Error
+description: Algo no funciona como debería
+labels: [bug]
+body:
+  - type: textarea
+    id: que-pasa
+    attributes:
+      label: Qué ha pasado
+      description: Cuéntanos qué esperabas y qué ha ocurrido en su lugar.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Cómo repetirlo
+      placeholder: "1. Abre Trabajos\n2. Pulsa «Nuevo trabajo»\n3. …"
+  - type: input
+    id: version
+    attributes:
+      label: Versión de ShiftLog
+      placeholder: "1.0.1"
+  - type: input
+    id: dispositivo
+    attributes:
+      label: Dispositivo y versión de Android
+      placeholder: "Pixel 8, Android 15"

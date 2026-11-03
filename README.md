@@ -1,8 +1,15 @@
 # ShiftLog
 
+[![Última versión](https://img.shields.io/github/v/release/Camach0F/ShiftLog?label=versi%C3%B3n)](https://github.com/Camach0F/ShiftLog/releases/latest)
+[![Compilación](https://img.shields.io/github/actions/workflow/status/Camach0F/ShiftLog/android-apk.yml?label=APK)](https://github.com/Camach0F/ShiftLog/actions/workflows/android-apk.yml)
+[![Licencia MIT](https://img.shields.io/github/license/Camach0F/ShiftLog)](LICENSE)
+![Plataforma Android](https://img.shields.io/badge/plataforma-Android-3DDC84?logo=android&logoColor=white)
+
 App para **Android** que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
 
-Hecha con React Native y TypeScript, solo para Android (móviles y tablets). Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
+Gratuita, sin anuncios, sin cuentas y de código abierto. Todo está desbloqueado. Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
+
+**[⬇ Descargar el APK](https://github.com/Camach0F/ShiftLog/releases/latest)** · [Cómo instalarla](#instalar-la-app) · [Apoya el proyecto](#apoya-el-proyecto)
 
 ## Qué hace
 
@@ -35,7 +42,11 @@ La app tiene dos partes separadas:
 
 ## Instalar la app
 
-Descarga el último APK desde [Releases](https://github.com/Camach0F/ShiftLog/releases/latest) en tu móvil o tablet Android y ábrelo. Hay que permitir «instalar apps de orígenes desconocidos». Todo el proceso, desde la compilación hasta la descarga, ocurre en GitHub.
+1. Descarga el último `ShiftLog-x.y.z.apk` desde [Releases](https://github.com/Camach0F/ShiftLog/releases/latest) en tu móvil o tablet Android.
+2. Ábrelo y, si Android lo pide, permite «instalar apps de orígenes desconocidos» para el navegador o el gestor de archivos que uses.
+3. Para actualizar, instala el APK de la versión nueva encima: se conservan tus datos.
+
+Los APK los compila y firma GitHub Actions a partir de este código, así que el archivo de Releases es el que sale del repositorio. Requiere Android 7 o superior.
 
 ## Desarrollo
 
@@ -76,7 +87,7 @@ Esto crea una clave, guarda su contraseña aleatoria como **secretos del reposit
 src/
   app/            Pantallas
     (tabs)/       Agenda, Turnos, Resumen y Trabajos
-    day/ entry/ event/ job/ type/ rotation/   Pantallas modales
+    day/ entry/ event/ job/ type/ rotation/   Pantallas de detalle y edición
   components/     Cuadrícula del mes, selector de turnos, controles
   lib/            Modelo de datos, almacén, cálculo de horas, exportación, plantillas
 ```
