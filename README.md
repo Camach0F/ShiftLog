@@ -12,7 +12,7 @@ La app tiene dos partes separadas:
 - **Turnos, Resumen y Trabajos** – lo que sí cuenta como horas trabajadas.
 
 ### Trabajos y turnos
-- Varios **trabajos** (empleos o clientes), cada uno con nombre, color, tarifa por hora y reglas de horas extra.
+- Varios **trabajos** (empleos o clientes), cada uno con nombre, color y forma de cobro: **por horas** (tarifa por hora y reglas de horas extra) o **por trabajo** (un precio fijo cada vez que lo añades al calendario).
 - Cada trabajo tiene sus **tipos de turno** (por ejemplo Mañana, Tarde, Noche): son plantillas con horario y un descanso opcional.
 - Los turnos son orientativos: al añadirlos a un día se pueden **ajustar las horas** solo para ese día, o usar «Otro horario» para escribir las tuyas.
 - Se pueden poner **varios turnos el mismo día**, también del mismo trabajo.

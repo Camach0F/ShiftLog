@@ -25,7 +25,7 @@ function rowsFor(data: Data, from: string, to: string, jobId: string | null): Ro
       end: r.end,
       breakMin: r.breakMin,
       minutes: r.minutes,
-      pay: r.rate ? (r.minutes / 60) * r.rate : 0,
+      pay: r.earned,
       note: e.note,
     });
   }

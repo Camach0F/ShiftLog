@@ -153,7 +153,9 @@ function migrate(saved: Record<string, any>): AppState {
         id: 'default',
         name: 'Mi trabajo',
         color: '#3B82F6',
+        payType: 'hourly',
         hourlyRate: null,
+        fixedRate: null,
         overtime: { ...defaultOvertime, ...saved.settings?.overtime },
       },
     ];
@@ -165,6 +167,8 @@ function migrate(saved: Record<string, any>): AppState {
   const oldTypes = state.types as OldType[];
   state.jobs = state.jobs.map((job) => ({
     ...job,
+    payType: job.payType ?? 'hourly',
+    fixedRate: job.fixedRate ?? null,
     hourlyRate: job.hourlyRate ?? oldTypes.find((x) => x.jobId === job.id && x.hourlyRate != null)?.hourlyRate ?? null,
   }));
   state.types = oldTypes.map(({ color: _color, hourlyRate: _rate, ...type }) => type);

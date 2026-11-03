@@ -8,13 +8,19 @@ export type Overtime = {
   multiplier: number;
 };
 
+/** How a job is paid: by the hour, or a fixed price every time the job is added to the calendar. */
+export type PayType = 'hourly' | 'fixed';
+
 /** An employer, client or workplace; owns its shift types, pay rate and overtime rules. */
 export type Job = {
   id: string;
   name: string;
   color: string;
+  payType: PayType;
   /** Hourly rate, the same for every shift of the job; null = no pay tracking */
   hourlyRate: number | null;
+  /** Price of each calendar entry when payType is "fixed", whatever the hours; null = no pay tracking */
+  fixedRate: number | null;
   overtime: Overtime;
 };
 
@@ -37,7 +43,9 @@ export type JobTemplate = {
   id: string;
   name: string;
   color: string;
+  payType: PayType;
   hourlyRate: number | null;
+  fixedRate: number | null;
   overtime: Overtime;
   shifts: TemplateShift[];
 };

@@ -8,7 +8,7 @@ import { formatDuration, shiftMinutes } from '@/lib/hours';
 import { defaultOvertime, newId, useStore } from '@/lib/store';
 import { BUILT_IN_TEMPLATES, isBuiltIn, templateFromJob } from '@/lib/templates';
 import { TYPE_COLORS, useTheme } from '@/lib/theme';
-import type { JobTemplate, Overtime, TemplateShift } from '@/lib/types';
+import type { JobTemplate, Overtime, PayType, TemplateShift } from '@/lib/types';
 
 /** Optional positive number: empty commits null, an unparsable value commits nothing. */
 function LimitField({ label, value, onCommit }: { label: string; value: number | null; onCommit: (v: number | null) => void }) {
@@ -41,7 +41,9 @@ export default function JobScreen() {
 
   const [name, setName] = useState(existing?.name ?? '');
   const [color, setColor] = useState(existing?.color ?? TYPE_COLORS[state.jobs.length % TYPE_COLORS.length]);
+  const [payType, setPayType] = useState<PayType>(existing?.payType ?? 'hourly');
   const [rate, setRate] = useState(existing?.hourlyRate != null ? String(existing.hourlyRate) : '');
+  const [fixedRate, setFixedRate] = useState(existing?.fixedRate != null ? String(existing.fixedRate) : '');
   const [overtime, setOvertime] = useState<Overtime>(existing?.overtime ?? defaultOvertime);
   const [multiplier, setMultiplier] = useState(String(overtime.multiplier));
   // New jobs only: shift types that will be created with the job, and whether to remember it.
@@ -55,7 +57,9 @@ export default function JobScreen() {
   const applyTemplate = (template: JobTemplate) => {
     setName(template.name);
     setColor(template.color);
+    setPayType(template.payType);
     setRate(template.hourlyRate != null ? String(template.hourlyRate) : '');
+    setFixedRate(template.fixedRate != null ? String(template.fixedRate) : '');
     setOvertime(template.overtime);
     setMultiplier(String(template.overtime.multiplier));
     setPending(template.shifts);
@@ -70,10 +74,12 @@ export default function JobScreen() {
     ]);
   };
 
-  const rateNum = rate.trim() === '' ? null : Number(rate.replace(',', '.'));
+  const parseAmount = (text: string) => (text.trim() === '' ? null : Number(text.replace(',', '.')));
+  const rateNum = parseAmount(rate);
+  const fixedNum = parseAmount(fixedRate);
+  const validAmount = (n: number | null) => n === null || (!Number.isNaN(n) && n >= 0);
   const multiplierNum = Number(multiplier.replace(',', '.'));
-  const valid =
-    name.trim() !== '' && (rateNum === null || (!Number.isNaN(rateNum) && rateNum >= 0)) && !Number.isNaN(multiplierNum) && multiplierNum >= 1;
+  const valid = name.trim() !== '' && validAmount(rateNum) && validAmount(fixedNum) && !Number.isNaN(multiplierNum) && multiplierNum >= 1;
 
   /** Saves over a template with the same name instead of piling up copies. */
   const rememberAs = (template: Omit<JobTemplate, 'id'>) => {
@@ -83,14 +89,16 @@ export default function JobScreen() {
 
   const save = () => {
     if (!valid) {
-      Alert.alert('Datos no válidos', 'Revisa el nombre, la tarifa y el multiplicador (mínimo 1).');
+      Alert.alert('Datos no válidos', 'Revisa el nombre, el importe y el multiplicador (mínimo 1).');
       return;
     }
     const job = {
       id: existing?.id ?? newId(),
       name: name.trim(),
       color,
+      payType,
       hourlyRate: rateNum,
+      fixedRate: fixedNum,
       overtime: { ...overtime, multiplier: multiplierNum },
     };
     saveJob(job);
@@ -99,7 +107,15 @@ export default function JobScreen() {
       return;
     }
     for (const { name, start, end, breakMin } of pending) saveType({ id: newId(), jobId: job.id, name, start, end, breakMin });
-    if (remember) rememberAs({ name: job.name, color: job.color, hourlyRate: job.hourlyRate, overtime: job.overtime, shifts: pending });
+    if (remember) rememberAs({
+        name: job.name,
+        color: job.color,
+        payType: job.payType,
+        hourlyRate: job.hourlyRate,
+        fixedRate: job.fixedRate,
+        overtime: job.overtime,
+        shifts: pending,
+      });
     // A new job continues on its own page so more shift types can be added right away.
     router.replace({ pathname: '/job/[id]', params: { id: job.id } });
   };
@@ -168,44 +184,70 @@ export default function JobScreen() {
           ))}
         </View>
 
-        <Field
-          label={`Tarifa por hora (${state.settings.currency}) — opcional`}
-          value={rate}
-          onChangeText={setRate}
-          keyboardType="decimal-pad"
-          placeholder="Sin tarifa"
-        />
-        <Text style={{ color: t.sub, fontSize: 12, marginBottom: 16 }}>Es la misma para todos los turnos de este trabajo.</Text>
+        <Text style={[styles.label, { color: t.sub }]}>Se cobra</Text>
+        <View style={[styles.chips, { marginBottom: 14 }]}>
+          <Chip label="Por horas" color={t.accent} selected={payType === 'hourly'} onPress={() => setPayType('hourly')} />
+          <Chip label="Por trabajo" color={t.accent} selected={payType === 'fixed'} onPress={() => setPayType('fixed')} />
+        </View>
+        {payType === 'hourly' ? (
+          <>
+            <Field
+              label={`Tarifa por hora (${state.settings.currency}) — opcional`}
+              value={rate}
+              onChangeText={setRate}
+              keyboardType="decimal-pad"
+              placeholder="Sin tarifa"
+            />
+            <Text style={{ color: t.sub, fontSize: 12, marginBottom: 16 }}>Es la misma para todos los turnos de este trabajo.</Text>
+          </>
+        ) : (
+          <>
+            <Field
+              label={`Precio por trabajo (${state.settings.currency}) — opcional`}
+              value={fixedRate}
+              onChangeText={setFixedRate}
+              keyboardType="decimal-pad"
+              placeholder="Sin precio"
+            />
+            <Text style={{ color: t.sub, fontSize: 12, marginBottom: 16 }}>
+              Se cobra el mismo importe cada vez que añades este trabajo al calendario, sean cuales sean las horas. Las horas se siguen contando en el resumen.
+            </Text>
+          </>
+        )}
 
-        <Text style={[styles.section, { color: t.sub }]}>HORAS EXTRA</Text>
-        <Card>
-          <View style={styles.switchRow}>
-            <Text style={{ color: t.text, flex: 1, fontSize: 16 }}>Calcular horas extra</Text>
-            <Switch value={overtime.enabled} onValueChange={(enabled) => setOvertime({ ...overtime, enabled })} />
-          </View>
-          {overtime.enabled && (
-            <View style={{ marginTop: 14 }}>
-              <View style={styles.pair}>
-                <LimitField
-                  key={`d${applied}`}
-                  label="Límite diario (h)"
-                  value={overtime.dailyHours}
-                  onCommit={(dailyHours) => setOvertime((o) => ({ ...o, dailyHours }))}
-                />
-                <LimitField
-                  key={`w${applied}`}
-                  label="Límite semanal (h)"
-                  value={overtime.weeklyHours}
-                  onCommit={(weeklyHours) => setOvertime((o) => ({ ...o, weeklyHours }))}
-                />
-              </View>
-              <Field label="Multiplicador de pago (1.5 = +50%)" value={multiplier} onChangeText={setMultiplier} keyboardType="decimal-pad" />
-              <Text style={{ color: t.sub, fontSize: 12 }}>
-                Las horas por encima del límite diario y, después, las que superen el semanal se cuentan como extra. El recargo se aplica sobre la tarifa media de esas horas.
-              </Text>
+        {payType === 'hourly' && (
+          <>
+          <Text style={[styles.section, { color: t.sub }]}>HORAS EXTRA</Text>
+          <Card>
+            <View style={styles.switchRow}>
+              <Text style={{ color: t.text, flex: 1, fontSize: 16 }}>Calcular horas extra</Text>
+              <Switch value={overtime.enabled} onValueChange={(enabled) => setOvertime({ ...overtime, enabled })} />
             </View>
-          )}
-        </Card>
+            {overtime.enabled && (
+              <View style={{ marginTop: 14 }}>
+                <View style={styles.pair}>
+                  <LimitField
+                    key={`d${applied}`}
+                    label="Límite diario (h)"
+                    value={overtime.dailyHours}
+                    onCommit={(dailyHours) => setOvertime((o) => ({ ...o, dailyHours }))}
+                  />
+                  <LimitField
+                    key={`w${applied}`}
+                    label="Límite semanal (h)"
+                    value={overtime.weeklyHours}
+                    onCommit={(weeklyHours) => setOvertime((o) => ({ ...o, weeklyHours }))}
+                  />
+                </View>
+                <Field label="Multiplicador de pago (1.5 = +50%)" value={multiplier} onChangeText={setMultiplier} keyboardType="decimal-pad" />
+                <Text style={{ color: t.sub, fontSize: 12 }}>
+                  Las horas por encima del límite diario y, después, las que superen el semanal se cuentan como extra. El recargo se aplica sobre la tarifa media de esas horas.
+                </Text>
+              </View>
+            )}
+          </Card>
+          </>
+        )}
 
         <Text style={[styles.section, { color: t.sub, marginTop: 24 }]}>TIPOS DE TURNO</Text>
         {existing ? (

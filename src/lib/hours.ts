@@ -47,8 +47,14 @@ export type Resolved = {
   end: string;
   breakMin: number;
   minutes: number;
-  rate: number | null;
+  /** What this entry pays: hours times the hourly rate, or the job's fixed price */
+  earned: number;
 };
+
+function earnedBy(job: Job, minutes: number): number {
+  if (job.payType === 'fixed') return job.fixedRate ?? 0;
+  return job.hourlyRate ? (minutes / 60) * job.hourlyRate : 0;
+}
 
 /** Shift types are suggestions: values stored on the entry win over the type's. */
 export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, jobs: Map<string, Job>): Resolved | null {
@@ -58,6 +64,7 @@ export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, j
   const start = entry.start ?? type?.start ?? FALLBACK.start;
   const end = entry.end ?? type?.end ?? FALLBACK.end;
   const breakMin = entry.breakMin ?? type?.breakMin ?? FALLBACK.breakMin;
+  const minutes = shiftMinutes(start, end, breakMin);
   return {
     entry,
     job,
@@ -67,8 +74,8 @@ export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, j
     start,
     end,
     breakMin,
-    minutes: shiftMinutes(start, end, breakMin),
-    rate: job.hourlyRate,
+    minutes,
+    earned: earnedBy(job, minutes),
   };
 }
 
@@ -92,7 +99,7 @@ function overtimeFor(entries: Resolved[], job: Job, from: string, to: string, we
   for (const r of entries) {
     const day = days.get(r.entry.date) ?? { min: 0, pay: 0 };
     day.min += r.minutes;
-    day.pay += r.rate ? (r.minutes / 60) * r.rate : 0;
+    day.pay += r.earned;
     days.set(r.entry.date, day);
   }
 
@@ -143,7 +150,7 @@ export function summarize(data: Data, from: string, to: string, jobId: string | 
     inJob.set(r.job.id, [...(inJob.get(r.job.id) ?? []), r]);
     if (e.date < from || e.date > to) continue;
 
-    const earned = r.rate ? (r.minutes / 60) * r.rate : 0;
+    const earned = r.earned;
 
     const key = r.type?.id ?? `own:${r.job.id}`;
     const row = perType.get(key) ?? { key, name: r.type?.name ?? 'Horario propio', color: r.color, job: r.job, count: 0, minutes: 0, pay: 0 };
@@ -163,7 +170,8 @@ export function summarize(data: Data, from: string, to: string, jobId: string | 
   let overtimePay = 0;
   for (const [id, entries] of inJob) {
     const job = jobs.get(id)!;
-    if (!job.overtime.enabled) continue;
+    // Overtime is a premium on the hourly rate; a fixed price has none.
+    if (!job.overtime.enabled || job.payType === 'fixed') continue;
     const ot = overtimeFor(entries, job, from, to, data.settings.weekStartsOn);
     overtimeMinutes += ot.minutes;
     overtimePay += ot.pay;

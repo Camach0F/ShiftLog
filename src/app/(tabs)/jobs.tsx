@@ -42,8 +42,14 @@ export default function JobsScreen() {
                   <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{job.name}</Text>
                   <Text style={{ color: t.sub }}>
                     {count} {count === 1 ? 'tipo de turno' : 'tipos de turno'}
-                    {job.hourlyRate != null ? ` · ${job.hourlyRate} ${currency}/h` : ''}
-                    {job.overtime.enabled ? ' · horas extra' : ''}
+                    {job.payType === 'fixed'
+                      ? job.fixedRate != null
+                        ? ` · ${job.fixedRate} ${currency} por trabajo`
+                        : ''
+                      : job.hourlyRate != null
+                        ? ` · ${job.hourlyRate} ${currency}/h`
+                        : ''}
+                    {job.payType !== 'fixed' && job.overtime.enabled ? ' · horas extra' : ''}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={t.sub} />

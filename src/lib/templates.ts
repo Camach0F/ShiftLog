@@ -8,7 +8,7 @@ const shift = (name: string, start: string, end: string, breakMin: number) => ({
   breakMin,
 });
 
-const base = { hourlyRate: null, overtime: defaultOvertime };
+const base = { payType: 'hourly' as const, hourlyRate: null, fixedRate: null, overtime: defaultOvertime };
 
 /** Starting points shipped with the app; the user's own templates are stored with their data. */
 export const BUILT_IN_TEMPLATES: JobTemplate[] = [
@@ -48,7 +48,9 @@ export function templateFromJob(job: Job, types: ShiftType[], id: string = newId
     id,
     name: job.name,
     color: job.color,
+    payType: job.payType,
     hourlyRate: job.hourlyRate,
+    fixedRate: job.fixedRate,
     overtime: job.overtime,
     shifts: types.map(({ name, start, end, breakMin }) => ({ name, start, end, breakMin })),
   };
