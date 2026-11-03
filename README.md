@@ -36,6 +36,10 @@ La app tiene dos partes separadas:
 - Eventos de todo el día o con horas (se pueden tomar las horas de uno de tus turnos).
 - Plantillas de evento, también integradas y propias.
 
+### Copia de seguridad y actualizaciones
+- **Copia en Google Drive** (opcional): al conectar tu cuenta, los datos se guardan solos en una carpeta oculta de tu Drive y se pueden restaurar en otro móvil. Nunca se sobrescribe una copia de otra instalación sin preguntarte.
+- **Avisos de versiones nuevas**: la app consulta GitHub, muestra las novedades y descarga e instala la actualización desde dentro.
+
 ### Diseño
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
 - Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.

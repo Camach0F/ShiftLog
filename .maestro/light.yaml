@@ -71,10 +71,9 @@ appId: com.camach0f.shiftlog
 # Settings: updates
 - tapOn: "Trabajos"
 - scrollUntilVisible:
-    element: "Buscar actualizaciones"
-- tapOn: "Buscar actualizaciones"
+    element: "ACTUALIZACIONES"
+# The test build is older than the latest release, so the card shows the new version.
 - extendedWaitUntil:
-    visible: "Tienes la última versión.*|No se pudo comprobar.*|Hay una versión nueva.*"
+    visible: "Hay una versión nueva.*|Versión.*"
     timeout: 15000
-    optional: true
 - takeScreenshot: 15-actualizaciones
