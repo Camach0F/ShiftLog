@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { TypePicker } from '@/components/TypePicker';
-import { BreakField, Button, Field } from '@/components/ui';
+import { BreakField, Button, Field, TimeField } from '@/components/ui';
 import { formatDuration, normalizeTime, resolveEntry, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -106,8 +106,8 @@ export default function EntryScreen() {
 
         <View style={{ height: 20 }} />
         <View style={styles.pair}>
-          <Field label="Entrada" value={start} onChangeText={setStart} placeholder="07:00" keyboardType="numbers-and-punctuation" />
-          <Field label="Salida" value={end} onChangeText={setEnd} placeholder="15:00" keyboardType="numbers-and-punctuation" />
+          <TimeField label="Entrada" value={start} onChangeText={setStart} />
+          <TimeField label="Salida" value={end} onChangeText={setEnd} />
         </View>
         <BreakField
           enabled={hasBreak}

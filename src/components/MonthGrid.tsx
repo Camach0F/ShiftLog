@@ -69,6 +69,7 @@ export function MonthGrid({
             <Pressable
               key={key}
               onPress={() => onPressDay(key)}
+              android_ripple={{ color: t.accent + '22' }}
               style={[
                 styles.cell,
                 { minHeight: cellHeight },

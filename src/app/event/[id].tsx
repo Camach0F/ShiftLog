@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { TypePicker } from '@/components/TypePicker';
-import { Button, Chip, Field } from '@/components/ui';
+import { Button, Chip, DateField, Field, TimeField } from '@/components/ui';
 import { isValidKey, todayKey } from '@/lib/dates';
 import { normalizeTime, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
@@ -112,7 +112,7 @@ export default function EventScreen() {
         )}
 
         <Field label="Título" value={title} onChangeText={setTitle} placeholder="Médico, cumpleaños, reunión…" />
-        <Field label="Fecha" value={date} onChangeText={setDate} placeholder="2026-11-03" autoCapitalize="none" />
+        <DateField label="Fecha" value={date} onChangeText={setDate} />
 
         <View style={[styles.segmented, { backgroundColor: t.border }]}>
           {[
@@ -144,8 +144,8 @@ export default function EventScreen() {
               </View>
             )}
             <View style={styles.pair}>
-              <Field label="Inicio" value={start} onChangeText={setStart} keyboardType="numbers-and-punctuation" />
-              <Field label="Fin" value={end} onChangeText={setEnd} keyboardType="numbers-and-punctuation" />
+              <TimeField label="Inicio" value={start} onChangeText={setStart} />
+              <TimeField label="Fin" value={end} onChangeText={setEnd} />
             </View>
           </>
         )}

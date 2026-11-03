@@ -160,6 +160,7 @@ export default function JobScreen() {
           {TYPE_COLORS.map((c) => (
             <Pressable
               key={c}
+              android_ripple={{ color: t.border }}
               accessibilityLabel={`Color ${c}`}
               onPress={() => setColor(c)}
               style={[styles.swatch, { backgroundColor: c, borderColor: c === color ? t.text : 'transparent' }]}
@@ -214,6 +215,7 @@ export default function JobScreen() {
                 {types.map((type, i) => (
                   <Pressable
                     key={type.id}
+                    android_ripple={{ color: t.border }}
                     onPress={() => router.push({ pathname: '/type/[id]', params: { id: type.id } })}
                     style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
                   >

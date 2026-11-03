@@ -1,8 +1,8 @@
 # ShiftLog
 
-App para iPhone, iPad y Android que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
+App para **Android** que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
 
-Hecha con [Expo](https://expo.dev) (React Native + TypeScript) y Expo Router. Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
+Hecha con [Expo](https://expo.dev) (React Native + TypeScript) y Expo Router, solo para Android (móviles y tablets). Los datos se guardan en el propio dispositivo; la app no envía nada a ningún servidor.
 
 ## Qué hace
 
@@ -31,17 +31,18 @@ La app tiene dos partes separadas:
 
 ### Diseño
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
+- Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.
 
 ## Cómo ejecutarla
 
-Necesitas Node.js (una versión LTS reciente) y, para probarla, la app **Expo Go** en tu móvil o un simulador.
+Necesitas Node.js (una versión LTS reciente) y un móvil Android con la app **Expo Go**, o un emulador de Android.
 
 ```bash
 npm install
 npm start
 ```
 
-Después pulsa `i` (simulador de iOS) o `a` (emulador de Android), o escanea el QR con Expo Go.
+Después escanea el QR con Expo Go o pulsa `a` para abrir el emulador de Android.
 
 > El proyecto incluye un `.npmrc` con `legacy-peer-deps=true` por un conflicto de versiones entre `react` y `react-dom`. Si añades dependencias con `npx expo install`, hazlo con `-- --legacy-peer-deps`.
 

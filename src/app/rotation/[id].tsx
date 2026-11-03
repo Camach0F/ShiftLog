@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { TypePicker } from '@/components/TypePicker';
-import { Button, Card, Field } from '@/components/ui';
+import { Button, Card, DateField, Field } from '@/components/ui';
 import { addDays, daysBetween, isValidKey, todayKey } from '@/lib/dates';
 import { entryFromType, newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -118,8 +118,8 @@ export default function RotationScreen() {
           El día 1 del ciclo cae en la fecha «Desde» y el patrón se repite hasta la fecha «Hasta».
         </Text>
         <View style={styles.pair}>
-          <Field label="Desde" value={from} onChangeText={setFrom} placeholder="2026-11-03" autoCapitalize="none" />
-          <Field label="Hasta" value={to} onChangeText={setTo} placeholder="2026-12-31" autoCapitalize="none" />
+          <DateField label="Desde" value={from} onChangeText={setFrom} />
+          <DateField label="Hasta" value={to} onChangeText={setTo} />
         </View>
         <View style={styles.switchRow}>
           <Text style={{ color: t.text, flex: 1 }}>Reemplazar turnos existentes en esos días</Text>

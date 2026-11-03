@@ -33,6 +33,7 @@ export default function JobsScreen() {
             return (
               <Pressable
                 key={job.id}
+                android_ripple={{ color: t.border }}
                 onPress={() => router.push({ pathname: '/job/[id]', params: { id: job.id } })}
                 style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
               >
@@ -61,6 +62,7 @@ export default function JobsScreen() {
           {state.rotations.map((r, i) => (
             <Pressable
               key={r.id}
+              android_ripple={{ color: t.border }}
               onPress={() => router.push({ pathname: '/rotation/[id]', params: { id: r.id } })}
               style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
             >

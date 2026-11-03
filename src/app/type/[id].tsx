@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { BreakField, Button, Field } from '@/components/ui';
+import { BreakField, Button, Field, TimeField } from '@/components/ui';
 import { formatDuration, normalizeTime, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -74,8 +74,8 @@ export default function TypeScreen() {
         <Field label="Nombre" value={name} onChangeText={setName} placeholder="Mañana" />
 
         <View style={styles.pair}>
-          <Field label="Entrada" value={start} onChangeText={setStart} keyboardType="numbers-and-punctuation" />
-          <Field label="Salida" value={end} onChangeText={setEnd} keyboardType="numbers-and-punctuation" />
+          <TimeField label="Entrada" value={start} onChangeText={setStart} />
+          <TimeField label="Salida" value={end} onChangeText={setEnd} />
         </View>
         <Text style={{ color: t.sub, fontSize: 12, marginBottom: 12 }}>
           Si la salida es anterior a la entrada, el turno cruza la medianoche. Con la misma hora de entrada y salida cuenta 0 horas (por ejemplo, un día libre).

@@ -18,12 +18,12 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="event/[id]" options={{ presentation: 'modal', title: 'Evento' }} />
-        <Stack.Screen name="job/[id]" options={{ presentation: 'modal', title: 'Trabajo' }} />
-        <Stack.Screen name="day/[date]" options={{ presentation: 'modal', title: 'Día' }} />
-        <Stack.Screen name="entry/[id]" options={{ presentation: 'modal', title: 'Turno' }} />
-        <Stack.Screen name="type/[id]" options={{ presentation: 'modal', title: 'Tipo de turno' }} />
-        <Stack.Screen name="rotation/[id]" options={{ presentation: 'modal', title: 'Rotación' }} />
+        <Stack.Screen name="event/[id]" options={{ title: 'Evento' }} />
+        <Stack.Screen name="job/[id]" options={{ title: 'Trabajo' }} />
+        <Stack.Screen name="day/[date]" options={{ title: 'Día' }} />
+        <Stack.Screen name="entry/[id]" options={{ title: 'Turno' }} />
+        <Stack.Screen name="type/[id]" options={{ title: 'Tipo de turno' }} />
+        <Stack.Screen name="rotation/[id]" options={{ title: 'Rotación' }} />
       </Stack>
     </StoreProvider>
   );

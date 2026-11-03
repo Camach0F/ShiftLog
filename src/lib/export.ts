@@ -1,5 +1,4 @@
 import { File, Paths } from 'expo-file-system';
-import { Platform } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
@@ -120,28 +119,24 @@ export function buildHtml(data: Data, from: string, to: string, label: string, j
   </body></html>`;
 }
 
-async function shareFile(uri: string, mimeType: string, uti: string) {
+async function shareFile(uri: string, mimeType: string) {
   if (!(await Sharing.isAvailableAsync())) throw new Error('Compartir no está disponible en este dispositivo.');
-  await Sharing.shareAsync(uri, { mimeType, UTI: uti });
+  await Sharing.shareAsync(uri, { mimeType });
 }
 
 export async function shareCsv(csv: string, label: string) {
   const file = new File(Paths.cache, `ShiftLog ${label.replace(/[^\w-]+/g, '_')} ${Date.now()}.csv`);
   file.create();
   await file.write(csv);
-  await shareFile(file.uri, 'text/csv', 'public.comma-separated-values-text');
+  await shareFile(file.uri, 'text/csv');
 }
 
-// A4 in points. iOS takes real page margins; elsewhere the page padding stands in for them.
+// A4 in points. Android has no page-margin option, so the page padding stands in for the margins.
 const A4 = { width: 595, height: 842 };
 const MARGIN = 57;
 
 export async function sharePdf(html: string) {
-  const page = Platform.OS === 'ios' ? html : html.replace('</style>', `body { padding: ${MARGIN}px; }</style>`);
-  const { uri } = await Print.printToFileAsync({
-    html: page,
-    ...A4,
-    margins: { left: MARGIN, right: MARGIN, top: MARGIN, bottom: MARGIN },
-  });
-  await shareFile(uri, 'application/pdf', 'com.adobe.pdf');
+  const page = html.replace('</style>', `body { padding: ${MARGIN}px; }</style>`);
+  const { uri } = await Print.printToFileAsync({ html: page, ...A4 });
+  await shareFile(uri, 'application/pdf');
 }

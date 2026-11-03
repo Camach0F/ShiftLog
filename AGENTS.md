@@ -1,4 +1,4 @@
-This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
+This is an Expo/React Native mobile application for **Android only** (phones and tablets). There is no iOS or web target: do not add iOS- or web-specific code or configuration. Prioritize mobile-first patterns and performance.
 
 ## Expo has changed — do not trust your training data
 
