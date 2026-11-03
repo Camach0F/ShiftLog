@@ -1,0 +1,78 @@
+# Walks through the app in light mode: create a job paid per job, add a shift to the calendar,
+# check the summary and exports, and look for updates.
+appId: es.jcamacho.shiftlog
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Agenda"
+- takeScreenshot: 01-agenda
+
+# New job from a template, paid per job
+- tapOn: "Trabajos"
+- takeScreenshot: 02-trabajos
+- tapOn: "Nuevo trabajo"
+- tapOn: "Oficina"
+- tapOn: "Por trabajo"
+- tapOn: "Sin precio"
+- inputText: "50"
+- hideKeyboard
+- takeScreenshot: 03-trabajo-nuevo
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Jornada"
+- takeScreenshot: 04-trabajo-guardado
+
+# Shift type form and the native time picker
+- scrollUntilVisible:
+    element: "Nuevo tipo de turno"
+- tapOn: "Nuevo tipo de turno"
+- takeScreenshot: 05-tipo-turno
+- tapOn:
+    text: "Elegir entrada"
+    optional: true
+- takeScreenshot: 06-selector-hora
+- pressKey: back
+- pressKey: back
+- takeScreenshot: 07-despues-de-volver
+
+# Add a shift to the 15th of the current month
+- tapOn: "Turnos"
+- takeScreenshot: 08-turnos
+- tapOn: "15"
+- takeScreenshot: 09-dia
+- tapOn: "Jornada"
+- takeScreenshot: 10-turno
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- takeScreenshot: 11-dia-con-turno
+- pressKey: back
+
+# Summary: one fixed-price job should add up to 50.00
+- tapOn: "Resumen"
+- assertVisible: "50.00 €"
+- takeScreenshot: 12-resumen
+- tapOn: "PDF"
+- extendedWaitUntil:
+    visible: "PDF"
+    timeout: 5000
+    optional: true
+- takeScreenshot: 13-pdf
+- pressKey: back
+- tapOn:
+    text: "CSV.*"
+    optional: true
+- takeScreenshot: 14-csv
+- pressKey: back
+
+# Settings: updates
+- tapOn: "Trabajos"
+- scrollUntilVisible:
+    element: "Buscar actualizaciones"
+- tapOn: "Buscar actualizaciones"
+- extendedWaitUntil:
+    visible: "Tienes la última versión.*|No se pudo comprobar.*|Hay una versión nueva.*"
+    timeout: 15000
+    optional: true
+- takeScreenshot: 15-actualizaciones

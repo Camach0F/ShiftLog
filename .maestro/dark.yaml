@@ -1,0 +1,12 @@
+# The same screens in dark mode (the workflow switches the emulator to night mode first).
+appId: es.jcamacho.shiftlog
+---
+- launchApp
+- assertVisible: "Agenda"
+- takeScreenshot: dark-01-agenda
+- tapOn: "Turnos"
+- takeScreenshot: dark-02-turnos
+- tapOn: "Resumen"
+- takeScreenshot: dark-03-resumen
+- tapOn: "Trabajos"
+- takeScreenshot: dark-04-trabajos
