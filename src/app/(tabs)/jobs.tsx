@@ -10,6 +10,10 @@ export default function JobsScreen() {
   const t = useTheme();
   const { state, setSettings } = useStore();
   const { currency, weekStartsOn, quickAdd } = state.settings;
+  const jobColorOfType = (typeId: string | null) => {
+    const type = state.types.find((x) => x.id === typeId);
+    return state.jobs.find((j) => j.id === type?.jobId)?.color;
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -66,7 +70,7 @@ export default function JobsScreen() {
                   {r.cycle.map((c, j) => (
                     <View
                       key={j}
-                      style={[styles.miniDot, { backgroundColor: state.types.find((x) => x.id === c)?.color ?? t.border }]}
+                      style={[styles.miniDot, { backgroundColor: jobColorOfType(c) ?? t.border }]}
                     />
                   ))}
                 </View>

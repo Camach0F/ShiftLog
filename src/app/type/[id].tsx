@@ -1,11 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Field } from '@/components/ui';
 import { formatDuration, normalizeTime, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
-import { TYPE_COLORS, useTheme } from '@/lib/theme';
+import { useTheme } from '@/lib/theme';
 
 export default function TypeScreen() {
   const t = useTheme();
@@ -15,7 +15,6 @@ export default function TypeScreen() {
   const job = state.jobs.find((j) => j.id === (existing?.jobId ?? jobId));
 
   const [name, setName] = useState(existing?.name ?? '');
-  const [color, setColor] = useState(existing?.color ?? job?.color ?? TYPE_COLORS[3]);
   const [start, setStart] = useState(existing?.start ?? '09:00');
   const [end, setEnd] = useState(existing?.end ?? '17:00');
   const [breakMin, setBreakMin] = useState(String(existing?.breakMin ?? 0));
@@ -41,7 +40,7 @@ export default function TypeScreen() {
       Alert.alert('Datos no válidos', 'Revisa el nombre, las horas (HH:mm), el descanso y la tarifa.');
       return;
     }
-    saveType({ id: existing?.id ?? newId(), jobId: job.id, name: name.trim(), color, start: s, end: e, breakMin: brk, hourlyRate: rateNum });
+    saveType({ id: existing?.id ?? newId(), jobId: job.id, name: name.trim(), start: s, end: e, breakMin: brk, hourlyRate: rateNum });
     router.back();
   };
 
@@ -74,18 +73,6 @@ export default function TypeScreen() {
         </View>
 
         <Field label="Nombre" value={name} onChangeText={setName} placeholder="Mañana" />
-
-        <Text style={[styles.label, { color: t.sub }]}>Color</Text>
-        <View style={styles.colors}>
-          {TYPE_COLORS.map((c) => (
-            <Pressable
-              key={c}
-              accessibilityLabel={`Color ${c}`}
-              onPress={() => setColor(c)}
-              style={[styles.swatch, { backgroundColor: c, borderColor: c === color ? t.text : 'transparent' }]}
-            />
-          ))}
-        </View>
 
         <View style={styles.pair}>
           <Field label="Entrada" value={start} onChangeText={setStart} keyboardType="numbers-and-punctuation" />
@@ -122,8 +109,5 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40, maxWidth: 700, width: '100%', alignSelf: 'center' },
   jobRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
   jobDot: { width: 10, height: 10, borderRadius: 5 },
-  label: { fontSize: 13, marginBottom: 8 },
-  colors: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 18 },
-  swatch: { width: 36, height: 36, borderRadius: 18, borderWidth: 3 },
   pair: { flexDirection: 'row', gap: 12 },
 });

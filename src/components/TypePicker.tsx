@@ -61,7 +61,7 @@ export function TypePicker({
           )}
           <View style={styles.group}>
             {types.map((type) => (
-              <Chip key={type.id} label={type.name} color={type.color} selected={selectedId === type.id} onPress={() => onPick(type.id)} />
+              <Chip key={type.id} label={type.name} color={job.color} selected={selectedId === type.id} onPress={() => onPick(type.id)} />
             ))}
             {onPickOwn && (
               <Chip

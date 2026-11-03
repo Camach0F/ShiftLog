@@ -217,7 +217,7 @@ export default function JobScreen() {
                     onPress={() => router.push({ pathname: '/type/[id]', params: { id: type.id } })}
                     style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
                   >
-                    <View style={[styles.dot, { backgroundColor: type.color }]} />
+                    <View style={[styles.dot, { backgroundColor: existing.color }]} />
                     <View style={{ flex: 1 }}>
                       <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{type.name}</Text>
                       <Text style={{ color: t.sub }}>{hoursLabel(type)}</Text>
@@ -241,7 +241,7 @@ export default function JobScreen() {
                   key={`${shift.name}-${i}`}
                   style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
                 >
-                  <View style={[styles.dot, { backgroundColor: shift.color }]} />
+                  <View style={[styles.dot, { backgroundColor: color }]} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{shift.name}</Text>
                     <Text style={{ color: t.sub }}>{hoursLabel(shift)}</Text>

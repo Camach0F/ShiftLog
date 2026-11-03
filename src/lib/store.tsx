@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 
-import type { AgendaEvent, AppState, Job, JobTemplate, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
+import type { AgendaEvent, AppState, EventTemplate, Job, JobTemplate, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
 
 const STORAGE_KEY = 'shiftlog:v1';
 
@@ -24,6 +24,7 @@ const initialState: AppState = {
   entries: [],
   rotations: [],
   templates: [],
+  eventTemplates: [],
   events: [],
   settings: { currency: '€', weekStartsOn: 1, quickAdd: false },
 };
@@ -41,6 +42,8 @@ type Action =
   | { type: 'deleteRotation'; id: string }
   | { type: 'saveTemplate'; template: JobTemplate }
   | { type: 'deleteTemplate'; id: string }
+  | { type: 'saveEventTemplate'; template: EventTemplate }
+  | { type: 'deleteEventTemplate'; id: string }
   | { type: 'saveEvent'; event: AgendaEvent }
   | { type: 'deleteEvent'; id: string }
   | { type: 'setSettings'; settings: Partial<Settings> };
@@ -93,6 +96,10 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, templates: upsert(state.templates, action.template) };
     case 'deleteTemplate':
       return { ...state, templates: state.templates.filter((t) => t.id !== action.id) };
+    case 'saveEventTemplate':
+      return { ...state, eventTemplates: upsert(state.eventTemplates, action.template) };
+    case 'deleteEventTemplate':
+      return { ...state, eventTemplates: state.eventTemplates.filter((t) => t.id !== action.id) };
     case 'saveEvent':
       return { ...state, events: upsert(state.events, action.event) };
     case 'deleteEvent':
@@ -116,6 +123,8 @@ type Store = {
   deleteRotation: (id: string) => void;
   saveTemplate: (template: JobTemplate) => void;
   deleteTemplate: (id: string) => void;
+  saveEventTemplate: (template: EventTemplate) => void;
+  deleteEventTemplate: (id: string) => void;
   saveEvent: (event: AgendaEvent) => void;
   deleteEvent: (id: string) => void;
   setSettings: (settings: Partial<Settings>) => void;
@@ -150,6 +159,8 @@ function migrate(saved: Record<string, any>): AppState {
     ];
     state.types = state.types.map((t) => ({ ...t, jobId: 'default' }));
   }
+  // Shift types used to carry a color of their own; the job's color is used now.
+  state.types = state.types.map(({ color: _color, ...type }: ShiftType & { color?: string }) => type);
   // Entries used to belong to a job only through their shift type.
   const jobOfType = new Map(state.types.map((t) => [t.id, t.jobId]));
   state.entries = state.entries
@@ -194,6 +205,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       deleteRotation: (id) => dispatch({ type: 'deleteRotation', id }),
       saveTemplate: (template) => dispatch({ type: 'saveTemplate', template }),
       deleteTemplate: (id) => dispatch({ type: 'deleteTemplate', id }),
+      saveEventTemplate: (template) => dispatch({ type: 'saveEventTemplate', template }),
+      deleteEventTemplate: (id) => dispatch({ type: 'deleteEventTemplate', id }),
       saveEvent: (event) => dispatch({ type: 'saveEvent', event }),
       deleteEvent: (id) => dispatch({ type: 'deleteEvent', id }),
       setSettings: (settings) => dispatch({ type: 'setSettings', settings }),

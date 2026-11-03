@@ -22,7 +22,6 @@ export type ShiftType = {
   id: string;
   jobId: string;
   name: string;
-  color: string;
   /** "HH:mm" */
   start: string;
   /** "HH:mm"; an end earlier than the start means the shift crosses midnight */
@@ -80,6 +79,9 @@ export type AgendaEvent = {
   color: string;
 };
 
+/** A reusable agenda event (everything except its date). */
+export type EventTemplate = Omit<AgendaEvent, 'id' | 'date'> & { id: string };
+
 export type Settings = {
   currency: string;
   /** 0 = Sunday, 1 = Monday */
@@ -101,6 +103,7 @@ export type AppState = {
   entries: ShiftEntry[];
   rotations: Rotation[];
   templates: JobTemplate[];
+  eventTemplates: EventTemplate[];
   events: AgendaEvent[];
   settings: Settings;
 };

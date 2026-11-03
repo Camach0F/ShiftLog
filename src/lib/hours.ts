@@ -66,7 +66,7 @@ export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, j
     job,
     type,
     name: type?.name ?? job.name,
-    color: type?.color ?? job.color,
+    color: job.color,
     start,
     end,
     breakMin,
