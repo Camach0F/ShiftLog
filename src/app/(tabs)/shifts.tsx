@@ -6,8 +6,8 @@ import { MonthGrid, Pill } from '@/components/MonthGrid';
 import { TypePicker } from '@/components/TypePicker';
 import { Button, Card } from '@/components/ui';
 import { todayKey } from '@/lib/dates';
-import { formatDuration, formatMoney, summarize } from '@/lib/hours';
-import { newId, useStore } from '@/lib/store';
+import { formatDuration, formatMoney, resolveEntry, summarize } from '@/lib/hours';
+import { entryFromType, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 import type { ShiftEntry } from '@/lib/types';
 
@@ -22,6 +22,7 @@ export default function ShiftsScreen() {
 
   const month = anchor.slice(0, 7);
   const typesById = useMemo(() => new Map(state.types.map((x) => [x.id, x])), [state.types]);
+  const jobsById = useMemo(() => new Map(state.jobs.map((j) => [j.id, j])), [state.jobs]);
 
   const entriesByDay = useMemo(() => {
     const map = new Map<string, ShiftEntry[]>();
@@ -46,8 +47,9 @@ export default function ShiftsScreen() {
   const idsOnSelected = () => state.entries.filter((e) => selected.has(e.date)).map((e) => e.id);
 
   const assign = (typeId: string) => {
-    const add = [...selected].map((date): ShiftEntry => ({ id: newId(), date, typeId, note: '' }));
-    applyEntries(add, idsOnSelected());
+    const type = typesById.get(typeId);
+    if (!type) return;
+    applyEntries([...selected].map((date) => entryFromType(type, date)), idsOnSelected());
     stopSelecting();
   };
 
@@ -97,8 +99,8 @@ export default function ShiftsScreen() {
             return (
               <>
                 {entries.slice(0, 3).map((e) => {
-                  const type = typesById.get(e.typeId);
-                  return type ? <Pill key={e.id} label={type.name} color={type.color} /> : null;
+                  const r = resolveEntry(e, typesById, jobsById);
+                  return r ? <Pill key={e.id} label={r.name} color={r.color} /> : null;
                 })}
                 {entries.length > 3 && <Text style={{ color: t.sub, fontSize: 10 }}>+{entries.length - 3}</Text>}
               </>
@@ -138,7 +140,7 @@ export default function ShiftsScreen() {
           <Text style={{ color: t.sub, fontSize: 12, marginBottom: 10 }}>Asignar un turno reemplaza lo que hubiera esos días.</Text>
           {selected.size > 0 && (
             <>
-              <TypePicker onPick={(typeId) => typeId && assign(typeId)} />
+              <TypePicker onPick={assign} />
               <View style={{ marginTop: 10 }}>
                 <Button label="Limpiar días" variant="danger" onPress={clear} />
               </View>

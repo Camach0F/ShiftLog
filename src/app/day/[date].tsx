@@ -5,15 +5,25 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { TypePicker } from '@/components/TypePicker';
 import { Card } from '@/components/ui';
 import { formatLong } from '@/lib/dates';
-import { effective, entryMinutes, formatDuration } from '@/lib/hours';
-import { newId, useStore } from '@/lib/store';
+import { formatDuration, resolveEntry } from '@/lib/hours';
+import { entryFromType, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 
 export default function DayScreen() {
   const t = useTheme();
   const { date } = useLocalSearchParams<{ date: string }>();
   const { state, saveEntry, deleteEntry } = useStore();
+  const types = new Map(state.types.map((x) => [x.id, x]));
+  const jobs = new Map(state.jobs.map((j) => [j.id, j]));
   const entries = state.entries.filter((e) => e.date === date);
+
+  // Tapping a shift type opens the editor with its hours so they can be adjusted before saving.
+  const addType = (typeId: string) => {
+    const type = types.get(typeId);
+    if (!type) return;
+    if (state.settings.quickAdd) saveEntry(entryFromType(type, date));
+    else router.push({ pathname: '/entry/[id]', params: { id: 'new', date, typeId } });
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -23,22 +33,22 @@ export default function DayScreen() {
 
       <View style={{ gap: 10 }}>
         {entries.map((entry) => {
-          const type = state.types.find((x) => x.id === entry.typeId);
-          if (!type) return null;
-          const { start, end } = effective(entry, type);
-          const minutes = entryMinutes(entry, type);
+          const r = resolveEntry(entry, types, jobs);
+          if (!r) return null;
           return (
             <Card key={entry.id} style={styles.entry}>
               <Pressable
                 style={styles.entryMain}
                 onPress={() => router.push({ pathname: '/entry/[id]', params: { id: entry.id, date } })}
               >
-                <View style={[styles.bar, { backgroundColor: type.color }]} />
+                <View style={[styles.bar, { backgroundColor: r.color }]} />
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.text, fontSize: 17, fontWeight: '700' }}>{type.name}</Text>
-                  {state.jobs.length > 1 && <Text style={{ color: t.sub, fontSize: 12 }}>{state.jobs.find((j) => j.id === type.jobId)?.name}</Text>}
+                  <Text style={{ color: t.text, fontSize: 17, fontWeight: '700' }}>{r.name}</Text>
+                  {(state.jobs.length > 1 || !r.type) && (
+                    <Text style={{ color: t.sub, fontSize: 12 }}>{r.type ? r.job.name : 'Horario propio'}</Text>
+                  )}
                   <Text style={{ color: t.sub }}>
-                    {minutes > 0 ? `${start} – ${end} · ${formatDuration(minutes)}` : 'Sin horas'}
+                    {r.minutes > 0 ? `${r.start} – ${r.end} · ${formatDuration(r.minutes)}` : 'Sin horas'}
                   </Text>
                   {entry.note !== '' && <Text style={{ color: t.text, marginTop: 4 }}>{entry.note}</Text>}
                 </View>
@@ -47,7 +57,7 @@ export default function DayScreen() {
                 accessibilityLabel="Eliminar turno"
                 hitSlop={10}
                 onPress={() =>
-                  Alert.alert('Eliminar turno', `¿Eliminar "${type.name}" de este día?`, [
+                  Alert.alert('Eliminar turno', `¿Eliminar "${r.name}" de este día?`, [
                     { text: 'Cancelar', style: 'cancel' },
                     { text: 'Eliminar', style: 'destructive', onPress: () => deleteEntry(entry.id) },
                   ])
@@ -61,9 +71,12 @@ export default function DayScreen() {
       </View>
 
       <Text style={[styles.section, { color: t.sub }]}>AÑADIR TURNO</Text>
-      <TypePicker onPick={(typeId) => typeId && saveEntry({ id: newId(), date, typeId, note: '' })} />
+      <TypePicker
+        onPick={addType}
+        onPickOwn={(jobId) => router.push({ pathname: '/entry/[id]', params: { id: 'new', date, jobId } })}
+      />
       <Text style={{ color: t.sub, marginTop: 14, fontSize: 13 }}>
-        Toca un turno para cambiar su horario, descanso o añadir una nota.
+        Los turnos solo sugieren las horas: al añadirlos puedes ajustarlas, o elegir «Otro horario» para escribir las tuyas. Toca un turno ya añadido para cambiarlo.
       </Text>
     </ScrollView>
   );

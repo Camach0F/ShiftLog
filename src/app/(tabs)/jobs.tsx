@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
@@ -9,7 +9,7 @@ import { useTheme } from '@/lib/theme';
 export default function JobsScreen() {
   const t = useTheme();
   const { state, setSettings } = useStore();
-  const { currency, weekStartsOn } = state.settings;
+  const { currency, weekStartsOn, quickAdd } = state.settings;
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -90,6 +90,15 @@ export default function JobsScreen() {
             <Button label={`${weekStartsOn === 0 ? '✓ ' : ''}Domingo`} variant="secondary" onPress={() => setSettings({ weekStartsOn: 0 })} />
           </View>
         </View>
+        <View style={styles.switchRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.text, fontSize: 16 }}>Añadir turnos sin editar</Text>
+            <Text style={{ color: t.sub, fontSize: 12 }}>
+              Al tocar un turno en un día se añade con sus horas por defecto, sin abrir el editor.
+            </Text>
+          </View>
+          <Switch value={quickAdd} onValueChange={(v) => setSettings({ quickAdd: v })} />
+        </View>
       </Card>
     </ScrollView>
   );
@@ -103,4 +112,5 @@ const styles = StyleSheet.create({
   dots: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
   miniDot: { width: 12, height: 12, borderRadius: 6 },
   pair: { flexDirection: 'row', gap: 12 },
+  switchRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16 },
 });

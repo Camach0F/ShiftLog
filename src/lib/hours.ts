@@ -24,19 +24,6 @@ export function shiftMinutes(start: string, end: string, breakMin: number): numb
   return Math.max(0, span - Math.max(0, breakMin));
 }
 
-export function effective(entry: ShiftEntry, type: ShiftType) {
-  return {
-    start: entry.start ?? type.start,
-    end: entry.end ?? type.end,
-    breakMin: entry.breakMin ?? type.breakMin,
-  };
-}
-
-export function entryMinutes(entry: ShiftEntry, type: ShiftType): number {
-  const { start, end, breakMin } = effective(entry, type);
-  return shiftMinutes(start, end, breakMin);
-}
-
 export function formatDuration(min: number): string {
   const h = Math.floor(min / 60);
   const m = min % 60;
@@ -49,7 +36,46 @@ export const formatMoney = (amount: number, currency: string) => `${amount.toFix
 /** Hourly rate of a shift type: its own override, else the job's, else none. */
 export const rateFor = (type: ShiftType, job: Job | undefined) => type.hourlyRate ?? job?.hourlyRate ?? null;
 
-export type TypeTotals = { type: ShiftType; job: Job | undefined; count: number; minutes: number; pay: number };
+const FALLBACK = { start: '09:00', end: '17:00', breakMin: 0 };
+
+/** A calendar entry with everything it inherits from its job and shift type filled in. */
+export type Resolved = {
+  entry: ShiftEntry;
+  job: Job;
+  type: ShiftType | null;
+  /** Shift type name, or the job's name for an entry with its own schedule */
+  name: string;
+  color: string;
+  start: string;
+  end: string;
+  breakMin: number;
+  minutes: number;
+  rate: number | null;
+};
+
+/** Shift types are suggestions: values stored on the entry win over the type's. */
+export function resolveEntry(entry: ShiftEntry, types: Map<string, ShiftType>, jobs: Map<string, Job>): Resolved | null {
+  const job = jobs.get(entry.jobId);
+  const type = entry.typeId ? (types.get(entry.typeId) ?? null) : null;
+  if (!job || (entry.typeId && !type)) return null;
+  const start = entry.start ?? type?.start ?? FALLBACK.start;
+  const end = entry.end ?? type?.end ?? FALLBACK.end;
+  const breakMin = entry.breakMin ?? type?.breakMin ?? FALLBACK.breakMin;
+  return {
+    entry,
+    job,
+    type,
+    name: type?.name ?? job.name,
+    color: type?.color ?? job.color,
+    start,
+    end,
+    breakMin,
+    minutes: shiftMinutes(start, end, breakMin),
+    rate: type ? rateFor(type, job) : job.hourlyRate,
+  };
+}
+
+export type TypeTotals = { key: string; name: string; color: string; job: Job; count: number; minutes: number; pay: number };
 export type JobTotals = { job: Job; minutes: number; pay: number; overtimeMinutes: number; worked: number };
 
 type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
@@ -60,18 +86,14 @@ type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
  * that contains the first day of that week, so a week split between two months is never
  * counted twice.
  */
-function overtimeFor(entries: ShiftEntry[], types: Map<string, ShiftType>, job: Job, from: string, to: string, weekStartsOn: number) {
+function overtimeFor(entries: Resolved[], job: Job, from: string, to: string, weekStartsOn: number) {
   const { overtime } = job;
   const days = new Map<string, { min: number; pay: number }>();
-  for (const e of entries) {
-    const type = types.get(e.typeId);
-    if (!type) continue;
-    const min = entryMinutes(e, type);
-    const rate = rateFor(type, job);
-    const day = days.get(e.date) ?? { min: 0, pay: 0 };
-    day.min += min;
-    day.pay += rate ? (min / 60) * rate : 0;
-    days.set(e.date, day);
+  for (const r of entries) {
+    const day = days.get(r.entry.date) ?? { min: 0, pay: 0 };
+    day.min += r.minutes;
+    day.pay += r.rate ? (r.minutes / 60) * r.rate : 0;
+    days.set(r.entry.date, day);
   }
 
   const weeks = new Map<string, string[]>();
@@ -113,30 +135,28 @@ export function summarize(data: Data, from: string, to: string, jobId: string | 
   const jobs = new Map(data.jobs.map((j) => [j.id, j]));
   const perType = new Map<string, TypeTotals>();
   const perJob = new Map<string, JobTotals>();
-  const inJob = new Map<string, ShiftEntry[]>();
+  const inJob = new Map<string, Resolved[]>();
 
   for (const e of data.entries) {
-    const type = types.get(e.typeId);
-    const job = type && jobs.get(type.jobId);
-    if (!type || !job || (jobId !== null && job.id !== jobId)) continue;
-    inJob.set(job.id, [...(inJob.get(job.id) ?? []), e]);
+    const r = resolveEntry(e, types, jobs);
+    if (!r || (jobId !== null && r.job.id !== jobId)) continue;
+    inJob.set(r.job.id, [...(inJob.get(r.job.id) ?? []), r]);
     if (e.date < from || e.date > to) continue;
 
-    const min = entryMinutes(e, type);
-    const rate = rateFor(type, job);
-    const earned = rate ? (min / 60) * rate : 0;
+    const earned = r.rate ? (r.minutes / 60) * r.rate : 0;
 
-    const row = perType.get(type.id) ?? { type, job, count: 0, minutes: 0, pay: 0 };
+    const key = r.type?.id ?? `own:${r.job.id}`;
+    const row = perType.get(key) ?? { key, name: r.type?.name ?? 'Horario propio', color: r.color, job: r.job, count: 0, minutes: 0, pay: 0 };
     row.count += 1;
-    row.minutes += min;
+    row.minutes += r.minutes;
     row.pay += earned;
-    perType.set(type.id, row);
+    perType.set(key, row);
 
-    const jobRow = perJob.get(job.id) ?? { job, minutes: 0, pay: 0, overtimeMinutes: 0, worked: 0 };
-    jobRow.minutes += min;
+    const jobRow = perJob.get(r.job.id) ?? { job: r.job, minutes: 0, pay: 0, overtimeMinutes: 0, worked: 0 };
+    jobRow.minutes += r.minutes;
     jobRow.pay += earned;
-    if (min > 0) jobRow.worked += 1;
-    perJob.set(job.id, jobRow);
+    if (r.minutes > 0) jobRow.worked += 1;
+    perJob.set(r.job.id, jobRow);
   }
 
   let overtimeMinutes = 0;
@@ -144,7 +164,7 @@ export function summarize(data: Data, from: string, to: string, jobId: string | 
   for (const [id, entries] of inJob) {
     const job = jobs.get(id)!;
     if (!job.overtime.enabled) continue;
-    const ot = overtimeFor(entries, types, job, from, to, data.settings.weekStartsOn);
+    const ot = overtimeFor(entries, job, from, to, data.settings.weekStartsOn);
     overtimeMinutes += ot.minutes;
     overtimePay += ot.pay;
     const jobRow = perJob.get(id) ?? { job, minutes: 0, pay: 0, overtimeMinutes: 0, worked: 0 };

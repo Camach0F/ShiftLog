@@ -7,6 +7,15 @@ const STORAGE_KEY = 'shiftlog:v1';
 
 export const newId = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
+/** A calendar entry that starts from a shift type; its hours can still be edited afterwards. */
+export const entryFromType = (type: ShiftType, date: string): ShiftEntry => ({
+  id: newId(),
+  date,
+  jobId: type.jobId,
+  typeId: type.id,
+  note: '',
+});
+
 export const defaultOvertime: Overtime = { enabled: false, dailyHours: null, weeklyHours: 40, multiplier: 1.5 };
 
 const initialState: AppState = {
@@ -15,7 +24,7 @@ const initialState: AppState = {
   entries: [],
   rotations: [],
   events: [],
-  settings: { currency: '€', weekStartsOn: 1 },
+  settings: { currency: '€', weekStartsOn: 1, quickAdd: false },
 };
 
 type Action =
@@ -40,7 +49,7 @@ const upsert = <T extends { id: string }>(list: T[], item: T) =>
 function removeTypes(state: AppState, ids: Set<string>): Pick<AppState, 'types' | 'entries' | 'rotations'> {
   return {
     types: state.types.filter((t) => !ids.has(t.id)),
-    entries: state.entries.filter((e) => !ids.has(e.typeId)),
+    entries: state.entries.filter((e) => e.typeId === null || !ids.has(e.typeId)),
     rotations: state.rotations.map((r) => ({ ...r, cycle: r.cycle.map((c) => (c !== null && ids.has(c) ? null : c)) })),
   };
 }
@@ -61,7 +70,13 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, jobs: upsert(state.jobs, action.job) };
     case 'deleteJob': {
       const typeIds = new Set(state.types.filter((t) => t.jobId === action.id).map((t) => t.id));
-      return { ...state, ...removeTypes(state, typeIds), jobs: state.jobs.filter((j) => j.id !== action.id) };
+      const removed = removeTypes(state, typeIds);
+      return {
+        ...state,
+        ...removed,
+        entries: removed.entries.filter((e) => e.jobId !== action.id),
+        jobs: state.jobs.filter((j) => j.id !== action.id),
+      };
     }
     case 'saveType':
       return { ...state, types: upsert(state.types, action.shiftType) };
@@ -107,7 +122,12 @@ function migrate(saved: Record<string, any>): AppState {
   const state: AppState = {
     ...initialState,
     ...saved,
-    settings: { ...initialState.settings, currency: saved.settings?.currency ?? '€', weekStartsOn: saved.settings?.weekStartsOn ?? 1 },
+    settings: {
+      ...initialState.settings,
+      currency: saved.settings?.currency ?? '€',
+      weekStartsOn: saved.settings?.weekStartsOn ?? 1,
+      quickAdd: saved.settings?.quickAdd ?? false,
+    },
   };
   if (!saved.jobs && state.types.length > 0) {
     state.jobs = [
@@ -121,6 +141,11 @@ function migrate(saved: Record<string, any>): AppState {
     ];
     state.types = state.types.map((t) => ({ ...t, jobId: 'default' }));
   }
+  // Entries used to belong to a job only through their shift type.
+  const jobOfType = new Map(state.types.map((t) => [t.id, t.jobId]));
+  state.entries = state.entries
+    .map((e) => ({ ...e, jobId: e.jobId ?? (e.typeId ? jobOfType.get(e.typeId) : undefined) }))
+    .filter((e): e is ShiftEntry => e.jobId !== undefined);
   return state;
 }
 

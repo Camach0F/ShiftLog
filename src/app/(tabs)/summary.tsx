@@ -105,16 +105,16 @@ export default function SummaryScreen() {
         </>
       )}
 
-      <Text style={[styles.section, { color: t.sub }]}>POR TIPO DE TURNO</Text>
+      <Text style={[styles.section, { color: t.sub }]}>POR TURNO</Text>
       {totals.rows.length === 0 ? (
         <Text style={{ color: t.sub, textAlign: 'center', marginTop: 12 }}>No hay turnos en este periodo.</Text>
       ) : (
         <Card style={{ gap: 14 }}>
           {totals.rows.map((r) => (
-            <View key={r.type.id}>
+            <View key={r.key}>
               <View style={styles.rowTop}>
                 <Text style={{ color: t.text, fontWeight: '600' }}>
-                  {jobId === null && state.jobs.length > 1 ? `${r.job?.name} · ${r.type.name}` : r.type.name}
+                  {jobId === null && state.jobs.length > 1 ? `${r.job.name} · ${r.name}` : r.name}
                 </Text>
                 <Text style={{ color: t.sub }}>
                   {r.count}× · {formatDuration(r.minutes)}
@@ -122,7 +122,7 @@ export default function SummaryScreen() {
                 </Text>
               </View>
               <View style={[styles.bar, { backgroundColor: t.border }]}>
-                <View style={{ width: `${(r.minutes / maxMinutes) * 100}%`, height: 8, borderRadius: 4, backgroundColor: r.type.color }} />
+                <View style={{ width: `${(r.minutes / maxMinutes) * 100}%`, height: 8, borderRadius: 4, backgroundColor: r.color }} />
               </View>
             </View>
           ))}

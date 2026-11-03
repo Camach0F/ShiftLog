@@ -36,9 +36,14 @@ export type ShiftEntry = {
   id: string;
   /** "YYYY-MM-DD" in local time */
   date: string;
-  typeId: string;
+  jobId: string;
+  /** The shift type this entry started from; null = a one-off schedule with its own hours */
+  typeId: string | null;
   note: string;
-  /** Per-day overrides of the shift type's defaults */
+  /**
+   * Hours of this day. Shift types are only suggestions: anything set here replaces the
+   * type's value, and entries without a type carry their own.
+   */
   start?: string;
   end?: string;
   breakMin?: number;
@@ -66,6 +71,8 @@ export type Settings = {
   currency: string;
   /** 0 = Sunday, 1 = Monday */
   weekStartsOn: 0 | 1;
+  /** Tapping a shift type adds it straight away instead of opening the editor first */
+  quickAdd: boolean;
 };
 
 /** A repeating pattern: day i of the cycle uses cycle[i] (null = nothing that day). */

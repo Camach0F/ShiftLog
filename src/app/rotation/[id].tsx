@@ -5,7 +5,7 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, 
 import { TypePicker } from '@/components/TypePicker';
 import { Button, Card, Field } from '@/components/ui';
 import { addDays, daysBetween, isValidKey, todayKey } from '@/lib/dates';
-import { newId, useStore } from '@/lib/store';
+import { entryFromType, newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 import type { Rotation, ShiftEntry } from '@/lib/types';
 
@@ -66,7 +66,9 @@ export default function RotationScreen() {
       const current = busy.get(date) ?? [];
       if (current.length > 0 && !replace) continue;
       removeIds.push(...current);
-      add.push({ id: newId(), date, typeId, note: '' });
+      const type = state.types.find((x) => x.id === typeId);
+      if (!type) continue;
+      add.push(entryFromType(type, date));
     }
 
     saveRotation(rotation);
@@ -90,7 +92,7 @@ export default function RotationScreen() {
           {cycle.map((typeId, i) => (
             <Card key={i} style={{ gap: 8 }}>
               <Text style={{ color: t.text, fontWeight: '600' }}>Día {i + 1}</Text>
-              <TypePicker allowNone selectedId={typeId} onPick={(next) => setDay(i, next)} />
+              <TypePicker noneSelected={typeId === null} onNone={() => setDay(i, null)} selectedId={typeId} onPick={(next) => setDay(i, next)} />
             </Card>
           ))}
         </View>

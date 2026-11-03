@@ -66,7 +66,7 @@ export default function JobScreen() {
 
   const remove = () => {
     if (!existing) return;
-    const entries = state.entries.filter((e) => types.some((x) => x.id === e.typeId)).length;
+    const entries = state.entries.filter((e) => e.jobId === existing.id).length;
     Alert.alert(
       'Eliminar trabajo',
       `Se eliminarán también sus ${types.length} tipos de turno y ${entries} turnos del calendario.`,

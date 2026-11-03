@@ -2,7 +2,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { effective, entryMinutes, formatDuration, formatMoney, rateFor, summarize } from './hours';
+import { formatDuration, formatMoney, resolveEntry, summarize } from './hours';
 import type { AppState } from './types';
 
 type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
@@ -13,21 +13,17 @@ function rowsFor(data: Data, from: string, to: string, jobId: string | null): Ro
   const jobs = new Map(data.jobs.map((j) => [j.id, j]));
   const rows: Row[] = [];
   for (const e of data.entries) {
-    const type = types.get(e.typeId);
-    const job = type && jobs.get(type.jobId);
-    if (!type || !job || e.date < from || e.date > to || (jobId !== null && job.id !== jobId)) continue;
-    const minutes = entryMinutes(e, type);
-    const rate = rateFor(type, job);
-    const { start, end, breakMin } = effective(e, type);
+    const r = resolveEntry(e, types, jobs);
+    if (!r || e.date < from || e.date > to || (jobId !== null && r.job.id !== jobId)) continue;
     rows.push({
       date: e.date,
-      job: job.name,
-      name: type.name,
-      start,
-      end,
-      breakMin,
-      minutes,
-      pay: rate ? (minutes / 60) * rate : 0,
+      job: r.job.name,
+      name: r.type?.name ?? 'Horario propio',
+      start: r.start,
+      end: r.end,
+      breakMin: r.breakMin,
+      minutes: r.minutes,
+      pay: r.rate ? (r.minutes / 60) * r.rate : 0,
       note: e.note,
     });
   }
