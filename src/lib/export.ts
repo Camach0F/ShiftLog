@@ -1,0 +1,102 @@
+import { File, Paths } from 'expo-file-system';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
+
+import { effective, entryMinutes, formatDuration, formatMoney, summarize } from './hours';
+import type { Settings, ShiftEntry, ShiftType } from './types';
+
+type Row = { date: string; name: string; start: string; end: string; breakMin: number; minutes: number; pay: number; note: string };
+
+function rowsFor(entries: ShiftEntry[], types: ShiftType[], from: string, to: string): Row[] {
+  const byId = new Map(types.map((t) => [t.id, t]));
+  const rows: Row[] = [];
+  for (const e of entries) {
+    const type = byId.get(e.typeId);
+    if (!type || e.date < from || e.date > to) continue;
+    const minutes = entryMinutes(e, type);
+    const { start, end, breakMin } = effective(e, type);
+    rows.push({
+      date: e.date,
+      name: type.name,
+      start,
+      end,
+      breakMin,
+      minutes,
+      pay: type.hourlyRate ? (minutes / 60) * type.hourlyRate : 0,
+      note: e.note,
+    });
+  }
+  return rows.sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
+}
+
+const csvCell = (v: string) => (/[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+// Spanish spreadsheets read ";" as separator and "," as decimal mark.
+const decimal = (n: number) => n.toFixed(2).replace('.', ',');
+
+export function buildCsv(entries: ShiftEntry[], types: ShiftType[], from: string, to: string): string {
+  const lines = [['Fecha', 'Turno', 'Entrada', 'Salida', 'Descanso (min)', 'Horas', 'Ingresos', 'Nota'].join(';')];
+  for (const r of rowsFor(entries, types, from, to)) {
+    lines.push(
+      [r.date, r.name, r.start, r.end, String(r.breakMin), decimal(r.minutes / 60), decimal(r.pay), r.note].map(csvCell).join(';'),
+    );
+  }
+  return `﻿${lines.join('\r\n')}\r\n`;
+}
+
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+export function buildHtml(entries: ShiftEntry[], types: ShiftType[], from: string, to: string, label: string, settings: Settings): string {
+  const rows = rowsFor(entries, types, from, to);
+  const totals = summarize(entries, types, from, to, settings);
+  const { currency } = settings;
+  const showPay = totals.pay > 0;
+
+  const body = rows
+    .map(
+      (r) => `<tr><td>${esc(r.date)}</td><td>${esc(r.name)}</td><td>${r.start}–${r.end}</td><td>${r.breakMin} min</td><td class="n">${formatDuration(r.minutes)}</td>${
+        showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''
+      }<td>${esc(r.note)}</td></tr>`,
+    )
+    .join('');
+
+  const perType = totals.rows
+    .map((r) => `<tr><td>${esc(r.type.name)}</td><td class="n">${r.count}</td><td class="n">${formatDuration(r.minutes)}</td>${showPay ? `<td class="n">${r.pay > 0 ? esc(formatMoney(r.pay, currency)) : ''}</td>` : ''}</tr>`)
+    .join('');
+
+  return `<html><head><meta charset="utf-8" /><style>
+    body { font-family: -apple-system, Helvetica, Arial, sans-serif; color: #111; padding: 24px; }
+    h1 { margin: 0 0 4px; } h2 { margin-top: 28px; font-size: 16px; }
+    .sub { color: #666; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; }
+    .n { text-align: right; white-space: nowrap; }
+    .totals { font-size: 15px; margin: 12px 0; }
+  </style></head><body>
+    <h1>ShiftLog</h1>
+    <div class="sub">${esc(label)}</div>
+    <div class="totals"><b>${formatDuration(totals.minutes)}</b> · ${totals.worked} turnos${
+      totals.overtimeMinutes > 0 ? ` · ${formatDuration(totals.overtimeMinutes)} extra` : ''
+    }${showPay ? ` · <b>${esc(formatMoney(totals.pay, currency))}</b>` : ''}</div>
+    <h2>Por tipo de turno</h2>
+    <table><tr><th>Turno</th><th class="n">Veces</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}</tr>${perType}</table>
+    <h2>Detalle</h2>
+    <table><tr><th>Fecha</th><th>Turno</th><th>Horario</th><th>Descanso</th><th class="n">Horas</th>${showPay ? '<th class="n">Ingresos</th>' : ''}<th>Nota</th></tr>${body}</table>
+  </body></html>`;
+}
+
+async function shareFile(uri: string, mimeType: string, uti: string) {
+  if (!(await Sharing.isAvailableAsync())) throw new Error('Compartir no está disponible en este dispositivo.');
+  await Sharing.shareAsync(uri, { mimeType, UTI: uti });
+}
+
+export async function shareCsv(csv: string, label: string) {
+  const file = new File(Paths.cache, `ShiftLog ${label.replace(/[^\w-]+/g, '_')} ${Date.now()}.csv`);
+  file.create();
+  await file.write(csv);
+  await shareFile(file.uri, 'text/csv', 'public.comma-separated-values-text');
+}
+
+export async function sharePdf(html: string) {
+  const { uri } = await Print.printToFileAsync({ html });
+  await shareFile(uri, 'application/pdf', 'com.adobe.pdf');
+}
