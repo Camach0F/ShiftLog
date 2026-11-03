@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
+import { UpdateCard } from '@/components/UpdateCard';
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -9,7 +10,7 @@ import { useTheme } from '@/lib/theme';
 export default function JobsScreen() {
   const t = useTheme();
   const { state, setSettings } = useStore();
-  const { currency, weekStartsOn, quickAdd } = state.settings;
+  const { currency, weekStartsOn, quickAdd, checkUpdates } = state.settings;
   const jobColorOfType = (typeId: string | null) => {
     const type = state.types.find((x) => x.id === typeId);
     return state.jobs.find((j) => j.id === type?.jobId)?.color;
@@ -110,6 +111,20 @@ export default function JobsScreen() {
             </Text>
           </View>
           <Switch value={quickAdd} onValueChange={(v) => setSettings({ quickAdd: v })} />
+        </View>
+      </Card>
+
+      <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>ACTUALIZACIONES</Text>
+      <Card>
+        <UpdateCard />
+        <View style={styles.switchRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: t.text, fontSize: 16 }}>Avisar de versiones nuevas</Text>
+            <Text style={{ color: t.sub, fontSize: 12 }}>
+              Al abrir la app consulta en GitHub si hay una versión nueva. No se envía ningún dato tuyo.
+            </Text>
+          </View>
+          <Switch value={checkUpdates} onValueChange={(v) => setSettings({ checkUpdates: v })} />
         </View>
       </Card>
     </ScrollView>

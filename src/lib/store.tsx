@@ -26,7 +26,7 @@ const initialState: AppState = {
   templates: [],
   eventTemplates: [],
   events: [],
-  settings: { currency: '€', weekStartsOn: 1, quickAdd: false },
+  settings: { currency: '€', weekStartsOn: 1, quickAdd: false, checkUpdates: true },
 };
 
 type Action =
@@ -145,6 +145,7 @@ function migrate(saved: Record<string, any>): AppState {
       currency: saved.settings?.currency ?? '€',
       weekStartsOn: saved.settings?.weekStartsOn ?? 1,
       quickAdd: saved.settings?.quickAdd ?? false,
+      checkUpdates: saved.settings?.checkUpdates ?? true,
     },
   };
   if (!saved.jobs && state.types.length > 0) {

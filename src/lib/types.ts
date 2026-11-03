@@ -94,6 +94,8 @@ export type Settings = {
   weekStartsOn: 0 | 1;
   /** Tapping a shift type adds it straight away instead of opening the editor first */
   quickAdd: boolean;
+  /** Look for a newer release on GitHub when the app opens */
+  checkUpdates: boolean;
 };
 
 /** A repeating pattern: day i of the cycle uses cycle[i] (null = nothing that day). */

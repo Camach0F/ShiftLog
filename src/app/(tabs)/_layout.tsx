@@ -1,12 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { useEffect } from 'react';
 
 import { useLayout } from '@/lib/layout';
+import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
+import { checkForUpdate } from '@/lib/updates';
 
 export default function TabsLayout() {
   const t = useTheme();
   const { isWide } = useLayout();
+  const { ready, state } = useStore();
+  const { checkUpdates } = state.settings;
+
+  // Once per launch, after the saved settings are loaded.
+  useEffect(() => {
+    if (ready && checkUpdates) checkForUpdate();
+  }, [ready, checkUpdates]);
+
   return (
     <Tabs
       screenOptions={{
