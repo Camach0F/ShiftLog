@@ -7,7 +7,7 @@
 
 App para **Android** que combina una **agenda personal** con el **registro de turnos de trabajo**: anota qué trabajas cada día y calcula las horas (y, si quieres, los ingresos).
 
-Gratuita, sin anuncios, sin cuentas y de código abierto. Todo está desbloqueado. Los datos se guardan en el propio dispositivo y no se envían a ningún servidor. Con internet solo hace dos cosas, ambas opcionales: preguntar a GitHub si hay una versión nueva y, si conectas tu cuenta de Google, guardar una copia de seguridad en una carpeta oculta de tu propio Drive (Ajustes → Copia de seguridad).
+Gratuita, sin anuncios, sin cuentas y de código abierto. Todo está desbloqueado. Los datos se guardan en el propio dispositivo y no se envían a ningún servidor. Con internet solo hace dos cosas, ambas opcionales: preguntar a GitHub si hay una versión nueva y, si conectas tu cuenta de Google, guardar una copia de seguridad en una carpeta oculta de tu propio Drive (Ajustes → Copia de seguridad). Más detalles en la [política de privacidad](PRIVACY.md).
 
 **[⬇ Descargar el APK](https://github.com/Camach0F/ShiftLog/releases/latest)** · [Cómo instalarla](#instalar-la-app) · [Apoya el proyecto](#apoya-el-proyecto)
 
