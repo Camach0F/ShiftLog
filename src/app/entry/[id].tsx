@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { TypePicker } from '@/components/TypePicker';
-import { Button, Field } from '@/components/ui';
+import { BreakField, Button, Field } from '@/components/ui';
 import { formatDuration, normalizeTime, resolveEntry, shiftMinutes } from '@/lib/hours';
 import { newId, useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -33,7 +33,9 @@ export default function EntryScreen() {
 
   const [start, setStart] = useState(current?.start ?? initialType?.start ?? '09:00');
   const [end, setEnd] = useState(current?.end ?? initialType?.end ?? '17:00');
-  const [breakMin, setBreakMin] = useState(String(current?.breakMin ?? initialType?.breakMin ?? 0));
+  const initialBreak = current?.breakMin ?? initialType?.breakMin ?? 0;
+  const [hasBreak, setHasBreak] = useState(initialBreak > 0);
+  const [breakMin, setBreakMin] = useState(String(initialBreak));
   const [note, setNote] = useState(existing?.note ?? '');
 
   const type = sel?.typeId ? types.get(sel.typeId) : undefined;
@@ -52,6 +54,7 @@ export default function EntryScreen() {
     setSel({ jobId: nextType.jobId, typeId: nextType.id });
     setStart(nextType.start);
     setEnd(nextType.end);
+    setHasBreak(nextType.breakMin > 0);
     setBreakMin(String(nextType.breakMin));
   };
 
@@ -59,12 +62,13 @@ export default function EntryScreen() {
     if (!type) return;
     setStart(type.start);
     setEnd(type.end);
+    setHasBreak(type.breakMin > 0);
     setBreakMin(String(type.breakMin));
   };
 
   const s = normalizeTime(start);
   const e = normalizeTime(end);
-  const brk = Number(breakMin);
+  const brk = hasBreak ? Number(breakMin) : 0;
   const valid = s !== null && e !== null && Number.isInteger(brk) && brk >= 0;
   const preview = valid ? formatDuration(shiftMinutes(s, e, brk)) : '—';
   const edited = type !== undefined && valid && (s !== type.start || e !== type.end || brk !== type.breakMin);
@@ -105,11 +109,18 @@ export default function EntryScreen() {
           <Field label="Entrada" value={start} onChangeText={setStart} placeholder="07:00" keyboardType="numbers-and-punctuation" />
           <Field label="Salida" value={end} onChangeText={setEnd} placeholder="15:00" keyboardType="numbers-and-punctuation" />
         </View>
-        <Field label="Descanso (minutos)" value={breakMin} onChangeText={setBreakMin} keyboardType="number-pad" />
+        <BreakField
+          enabled={hasBreak}
+          minutes={breakMin}
+          onChange={(enabled, minutes) => {
+            setHasBreak(enabled);
+            setBreakMin(minutes);
+          }}
+        />
         {type && (
           <View style={styles.hint}>
             <Text style={{ color: t.sub, fontSize: 12, flex: 1 }}>
-              Horas del turno «{type.name}»: {type.start} – {type.end}, {type.breakMin} min de descanso. Cambiarlas solo afecta a este día.
+              Horas del turno «{type.name}»: {type.start} – {type.end}{type.breakMin > 0 ? `, ${type.breakMin} min de descanso` : ''}. Cambiarlas solo afecta a este día.
             </Text>
             {edited && (
               <Pressable hitSlop={8} onPress={resetToType}>

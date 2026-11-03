@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Switch, Text, TextInput, View, type StyleProp, type TextInputProps, type ViewStyle } from 'react-native';
 
 import { useTheme } from '@/lib/theme';
 
@@ -45,6 +45,38 @@ export function Field({ label, ...input }: { label: string } & TextInputProps) {
   );
 }
 
+/** Optional break of a shift: off by default; when on, asks for the minutes that are subtracted. */
+export function BreakField({
+  enabled,
+  minutes,
+  onChange,
+}: {
+  enabled: boolean;
+  minutes: string;
+  onChange: (enabled: boolean, minutes: string) => void;
+}) {
+  const t = useTheme();
+  return (
+    <View style={{ marginBottom: 12 }}>
+      <View style={styles.breakRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: t.text, fontSize: 16 }}>Descanso</Text>
+          <Text style={{ color: t.sub, fontSize: 12 }}>Opcional. Se resta de las horas del turno.</Text>
+        </View>
+        <Switch
+          value={enabled}
+          onValueChange={(next) => onChange(next, next && (minutes.trim() === '' || minutes === '0') ? '30' : minutes)}
+        />
+      </View>
+      {enabled && (
+        <View style={{ marginTop: 10 }}>
+          <Field label="Minutos de descanso" value={minutes} onChangeText={(v) => onChange(true, v)} keyboardType="number-pad" />
+        </View>
+      )}
+    </View>
+  );
+}
+
 export function Chip({
   label,
   color,
@@ -71,6 +103,7 @@ export function Chip({
 }
 
 const styles = StyleSheet.create({
+  breakRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   card: { borderRadius: 14, padding: 14 },
   button: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, paddingVertical: 13, alignItems: 'center' },
   buttonLabel: { fontSize: 16, fontWeight: '600' },
