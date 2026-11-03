@@ -83,7 +83,7 @@ Los APK los compila y firma GitHub Actions a partir de este código, así que el
 
 ## Apoya el proyecto
 
-ShiftLog es gratuita y de código abierto, y siempre lo será. Si te resulta útil y quieres ayudar a seguir mejorándola, puedes hacer una donación voluntaria, puntual o mensual, con GitHub Sponsors o con PayPal:
+ShiftLog es gratuita y de código abierto, y siempre lo será. Si te resulta útil y quieres ayudar a seguir mejorándola, puedes hacer una donación voluntaria, de una sola vez y con el importe que quieras, con GitHub Sponsors o con PayPal:
 
 [![Patrocinar en GitHub](https://img.shields.io/badge/Patrocinar-GitHub_Sponsors-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Camach0F)
 [![Donar por PayPal](https://img.shields.io/badge/Donar-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/paypalme/jcamachopay)
