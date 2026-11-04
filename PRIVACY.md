@@ -28,6 +28,6 @@ El uso que ShiftLog hace de la información recibida de las APIs de Google cumpl
 
 ## Contacto
 
-Para cualquier duda sobre privacidad, abre una incidencia en [github.com/Camach0F/ShiftLog/issues](https://github.com/Camach0F/ShiftLog/issues).
+Para cualquier duda sobre privacidad, abre una incidencia en [github.com/Camach0F/ShiftLog/issues](https://github.com/Camach0F/ShiftLog/issues) o escribe en el [servidor de Discord de soporte](https://discord.gg/4tyPqWuedP).
 
 Si esta política cambia, se actualizará en este archivo y la fecha de arriba reflejará el cambio.

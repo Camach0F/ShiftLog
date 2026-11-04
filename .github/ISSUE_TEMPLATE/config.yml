@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Soporte en Discord
+    url: https://discord.gg/4tyPqWuedP
+    about: Dudas, ayuda con la app o consultas rápidas. Si es un error o una sugerencia, también puedes abrir una incidencia aquí.
   - name: Apoyar el proyecto
     url: https://github.com/sponsors/Camach0F
     about: ShiftLog es gratuita; las donaciones son voluntarias y no desbloquean nada. También puedes donar por PayPal desde el README.

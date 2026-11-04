@@ -18,6 +18,7 @@
   <a href="https://github.com/Camach0F/ShiftLog/actions/workflows/android-apk.yml"><img src="https://img.shields.io/github/actions/workflow/status/Camach0F/ShiftLog/android-apk.yml?label=APK" alt="Compilación"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/Camach0F/ShiftLog" alt="Licencia MIT"></a>
   <img src="https://img.shields.io/badge/plataforma-Android-3DDC84?logo=android&logoColor=white" alt="Plataforma Android">
+  <a href="https://discord.gg/4tyPqWuedP"><img src="https://img.shields.io/badge/soporte-Discord-5865F2?logo=discord&logoColor=white" alt="Soporte en Discord"></a>
 </p>
 
 <p align="center">
@@ -33,7 +34,7 @@
 - **Tus datos son tuyos.** Se guardan en tu dispositivo. Con internet solo hace dos cosas, ambas opcionales: avisarte de versiones nuevas y, si conectas tu cuenta de Google, guardar una copia en una carpeta oculta de tu propio Drive. Más detalles en la [política de privacidad](PRIVACY.md).
 - **Pensada para turnos reales.** Varios trabajos, turnos que puedes ajustar cada día, horas extra, rotaciones y cobro por horas o por trabajo.
 
-[Instalar](#instalar-la-app) · [Qué hace](#qué-hace) · [Apoya el proyecto](#apoya-el-proyecto)
+[Instalar](#instalar-la-app) · [Qué hace](#qué-hace) · [Soporte](#soporte) · [Apoya el proyecto](#apoya-el-proyecto)
 
 ## Qué hace
 
@@ -105,6 +106,14 @@ Los APK los compila y firma GitHub Actions a partir de este código, así que el
 
 ### Compartirla
 Dentro de la app, en **Ajustes → Compartir**, hay un botón que envía el enlace de descarga por WhatsApp, Telegram, correo o lo que prefieras.
+
+## Soporte
+
+¿Tienes dudas, algo no te funciona o quieres proponer una mejora? Entra al servidor de Discord, donde se atiende el soporte de ShiftLog:
+
+[![Soporte en Discord](https://img.shields.io/badge/Soporte-Discord-5865F2?logo=discord&logoColor=white)](https://discord.gg/4tyPqWuedP)
+
+También puedes abrir una [incidencia en GitHub](https://github.com/Camach0F/ShiftLog/issues/new/choose).
 
 ## Apoya el proyecto
 
