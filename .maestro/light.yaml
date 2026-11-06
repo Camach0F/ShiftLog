@@ -80,3 +80,13 @@ appId: com.camach0f.shiftlog
     visible: "Hay una versión nueva.*|Versión.*"
     timeout: 15000
 - takeScreenshot: 15-actualizaciones
+
+# What's new popup, opened by hand: the changes, the Discord button and Accept
+- scrollUntilVisible:
+    element: "Ver novedades de esta versión"
+- tapOn: "Ver novedades de esta versión"
+- assertVisible: "Novedades de la versión.*"
+- assertVisible: "Unirme al Discord"
+- takeScreenshot: 16-novedades
+- tapOn: "Aceptar"
+- assertNotVisible: "Unirme al Discord"

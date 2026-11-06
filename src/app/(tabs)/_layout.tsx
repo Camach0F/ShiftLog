@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { BackupAutoSave } from '@/components/BackupCard';
 import { CalendarAutoSync } from '@/components/CalendarCard';
+import { WhatsNewAuto } from '@/components/WhatsNew';
 import { useLayout } from '@/lib/layout';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -24,6 +25,7 @@ export default function TabsLayout() {
     <>
       <BackupAutoSave />
       <CalendarAutoSync />
+      <WhatsNewAuto />
       <Tabs
         screenOptions={{
           tabBarPosition: isWide ? 'left' : 'bottom',

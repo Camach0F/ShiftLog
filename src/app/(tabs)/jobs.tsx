@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { BackupCard } from '@/components/BackupCard';
 import { CalendarCard } from '@/components/CalendarCard';
 import { UpdateCard } from '@/components/UpdateCard';
+import { currentRelease, WhatsNewDialog } from '@/components/WhatsNew';
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -17,6 +19,7 @@ export default function JobsScreen() {
   const t = useTheme();
   const { state, setSettings } = useStore();
   const { currency, weekStartsOn, quickAdd, checkUpdates } = state.settings;
+  const [notesOpen, setNotesOpen] = useState(false);
   const jobColorOfType = (typeId: string | null) => {
     const type = state.types.find((x) => x.id === typeId);
     return state.jobs.find((j) => j.id === type?.jobId)?.color;
@@ -173,7 +176,11 @@ export default function JobsScreen() {
           </View>
           <Switch value={checkUpdates} onValueChange={(v) => setSettings({ checkUpdates: v })} />
         </View>
+        <View style={{ marginTop: 14 }}>
+          <Button label="Ver novedades de esta versión" variant="secondary" onPress={() => setNotesOpen(true)} />
+        </View>
       </Card>
+      <WhatsNewDialog visible={notesOpen} release={currentRelease()} onClose={() => setNotesOpen(false)} />
 
       <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>COMPARTIR</Text>
       <Card>

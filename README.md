@@ -64,7 +64,7 @@ La app tiene dos partes separadas:
 
 ### Copia de seguridad y actualizaciones
 - **Copia en Google Drive** (opcional): al conectar tu cuenta, los datos se guardan solos en una carpeta oculta de tu Drive y se pueden restaurar en otro móvil. Nunca se sobrescribe una copia de otra instalación sin preguntarte.
-- **Avisos de versiones nuevas**: la app consulta GitHub, muestra las novedades y descarga e instala la actualización desde dentro.
+- **Avisos de versiones nuevas**: la app consulta GitHub, muestra las novedades y descarga e instala la actualización desde dentro. Tras actualizar, un aviso te cuenta qué ha cambiado y te lleva al [Discord de soporte](https://discord.gg/4tyPqWuedP).
 
 ### Diseño
 <p align="center">
