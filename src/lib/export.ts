@@ -154,8 +154,15 @@ export async function shareCsv(csv: string, label: string) {
 const A4 = { width: 595, height: 842 };
 const MARGIN = 57;
 
-/** "ShiftLog - Noviembre 2026.pdf" for any day of that month. */
-export const pdfFileName = (anchor: string) => `ShiftLog - ${formatMonth(anchor).replace(' de ', ' ')}.pdf`;
+/**
+ * "ShiftLog | Hostelería Noviembre 2026.pdf" for any day of that month; without a category (all of
+ * them) it is "ShiftLog | Noviembre 2026.pdf". Characters that cannot go in a file name are replaced.
+ */
+export const pdfFileName = (anchor: string, category?: string) => {
+  const month = formatMonth(anchor).replace(' de ', ' ');
+  const name = category ? `${category.replace(/[\\/:*?"<>|]+/g, '-').trim()} ` : '';
+  return `ShiftLog | ${name}${month}.pdf`;
+};
 
 /** Prints the report to a PDF named after its month and opens the share sheet. */
 export async function sharePdf(html: string, fileName: string) {

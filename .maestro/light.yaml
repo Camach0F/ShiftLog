@@ -61,7 +61,7 @@ appId: com.camach0f.shiftlog
 - tapOn: "Generar PDF"
 # The share sheet shows the file name
 - extendedWaitUntil:
-    visible: "ShiftLog - .* [0-9]{4}.pdf"
+    visible: "ShiftLog.*[0-9]{4}.pdf"
     timeout: 15000
 - takeScreenshot: 13b-pdf
 - pressKey: back

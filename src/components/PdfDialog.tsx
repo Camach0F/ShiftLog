@@ -27,7 +27,7 @@ export function PdfDialog({ visible, initialAnchor, onClose }: { visible: boolea
     try {
       const scope: CategoryScope = chosen === 'all' ? 'all' : { categoryId: chosen === 'none' ? null : chosen };
       const html = buildHtml(inCategory(state, scope), startOfMonth(anchor), endOfMonth(anchor), formatMonth(anchor), null, categoryName && `Categoría: ${categoryName}`);
-      await sharePdf(html, pdfFileName(anchor));
+      await sharePdf(html, pdfFileName(anchor, categoryName));
       onClose();
     } catch (e) {
       Alert.alert('No se pudo exportar', e instanceof Error ? e.message : 'Inténtalo de nuevo.');
@@ -68,7 +68,7 @@ export function PdfDialog({ visible, initialAnchor, onClose }: { visible: boolea
             )}
 
             <Text style={{ color: t.sub, fontSize: 12, marginTop: 14 }}>
-              Se guardará como «{pdfFileName(anchor)}» y podrás enviarlo o guardarlo desde el menú de compartir.
+              Se guardará como «{pdfFileName(anchor, categoryName)}» y podrás enviarlo o guardarlo desde el menú de compartir.
             </Text>
             <View style={{ marginTop: 16, gap: 10 }}>
               <Button label={busy ? 'Generando…' : 'Generar PDF'} onPress={() => !busy && generate()} />
