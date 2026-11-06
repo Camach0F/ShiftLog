@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { PdfDialog } from '@/components/PdfDialog';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { Button, Card, Chip } from '@/components/ui';
 import { rangeFor, shiftAnchor, todayKey, type RangeMode } from '@/lib/dates';
 import { buildCsv, shareCsv } from '@/lib/export';
@@ -49,6 +50,7 @@ export default function SummaryScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
+      <UpdateBanner />
       <View style={[styles.segmented, { backgroundColor: t.border }]}>
         {MODES.map((m) => (
           <Pressable

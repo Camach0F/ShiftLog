@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { Button, Card } from '@/components/ui';
 import { useTheme } from '@/lib/theme';
-import { checkForUpdate, dismissUpdate, downloadAndInstall, installedVersion, useUpdateState } from '@/lib/updates';
+import { checkForUpdate, dismissUpdate, installedVersion, useInstallUpdate, useUpdateState } from '@/lib/updates';
 
 /**
  * Notice for a new version published on GitHub, with a button that downloads it and opens
@@ -13,19 +12,7 @@ import { checkForUpdate, dismissUpdate, downloadAndInstall, installedVersion, us
 export function UpdateCard({ notice = false }: { notice?: boolean }) {
   const t = useTheme();
   const { status, update, dismissed } = useUpdateState();
-  const [downloading, setDownloading] = useState(false);
-
-  const install = async () => {
-    if (!update) return;
-    setDownloading(true);
-    try {
-      await downloadAndInstall(update);
-    } catch {
-      Alert.alert('No se pudo actualizar', 'Revisa la conexión e inténtalo de nuevo, o descarga el APK desde GitHub.');
-    } finally {
-      setDownloading(false);
-    }
-  };
+  const { downloading, install } = useInstallUpdate();
 
   if (status === 'available' && update) {
     if (notice && dismissed) return null;
@@ -37,7 +24,7 @@ export function UpdateCard({ notice = false }: { notice?: boolean }) {
         </Text>
         {update.notes !== '' && <Text style={{ color: t.text, marginTop: 10 }}>{update.notes}</Text>}
         <View style={{ marginTop: 14, gap: 10 }}>
-          <Button label={downloading ? 'Descargando…' : 'Descargar e instalar'} onPress={() => !downloading && install()} />
+          <Button label={downloading ? 'Descargando…' : 'Descargar e instalar'} onPress={() => install(update)} />
           {notice && <Button label="Ahora no" variant="secondary" onPress={dismissUpdate} />}
         </View>
         <Text style={{ color: t.sub, fontSize: 12, marginTop: 10 }}>

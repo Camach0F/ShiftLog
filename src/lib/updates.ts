@@ -2,7 +2,8 @@ import Constants from 'expo-constants';
 import { Directory, File, Paths } from 'expo-file-system';
 import { getContentUriAsync } from 'expo-file-system/legacy';
 import { startActivityAsync } from 'expo-intent-launcher';
-import { useSyncExternalStore } from 'react';
+import { useState, useSyncExternalStore } from 'react';
+import { Alert } from 'react-native';
 
 const REPO = 'Camach0F/ShiftLog';
 /** Only APKs published on this repository's releases are ever downloaded. */
@@ -21,6 +22,7 @@ export type UpdateState = {
 };
 
 let state: UpdateState = { status: 'idle', update: null, dismissed: false };
+let lastCheckedAt = 0;
 const listeners = new Set<() => void>();
 
 function setState(next: Partial<UpdateState>) {
@@ -63,6 +65,7 @@ const plainNotes = (body: string) =>
 /** Asks GitHub for the latest release. Never throws: failures end in the "error" status. */
 export async function checkForUpdate(): Promise<void> {
   if (state.status === 'checking') return;
+  lastCheckedAt = Date.now();
   setState({ status: 'checking' });
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -92,6 +95,11 @@ export async function checkForUpdate(): Promise<void> {
   }
 }
 
+/** Checks again only if the last check is older than `maxAgeMs` (for when the app comes back to the foreground). */
+export async function checkForUpdateIfStale(maxAgeMs: number): Promise<void> {
+  if (Date.now() - lastCheckedAt >= maxAgeMs) await checkForUpdate();
+}
+
 /**
  * Downloads the APK and hands it to Android's installer, which asks the user to confirm. The new
  * version only installs over this one if it is signed with the same key.
@@ -106,4 +114,21 @@ export async function downloadAndInstall(update: Update): Promise<void> {
     type: 'application/vnd.android.package-archive',
     flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
   });
+}
+
+/** Installs an update from a button: tracks the download and explains a failure. */
+export function useInstallUpdate() {
+  const [downloading, setDownloading] = useState(false);
+  const install = async (update: Update) => {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      await downloadAndInstall(update);
+    } catch {
+      Alert.alert('No se pudo actualizar', 'Revisa la conexión e inténtalo de nuevo, o descarga el APK desde GitHub.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+  return { downloading, install };
 }

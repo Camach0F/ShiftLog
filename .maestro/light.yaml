@@ -5,6 +5,11 @@ appId: com.camach0f.shiftlog
 - launchApp:
     clearState: true
 - assertVisible: "Agenda"
+# The test build calls itself 0.9.0, so the published release is an update
+- extendedWaitUntil:
+    visible: "Instalar"
+    timeout: 20000
+- assertVisible: "Hay una actualización.*"
 - takeScreenshot: 01-agenda
 
 # New job from a template, paid per job

@@ -5,6 +5,7 @@ import { Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 're
 
 import { BackupCard } from '@/components/BackupCard';
 import { CalendarCard } from '@/components/CalendarCard';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { UpdateCard } from '@/components/UpdateCard';
 import { currentRelease, WhatsNewDialog } from '@/components/WhatsNew';
 import { Button, Card, Field } from '@/components/ui';
@@ -62,6 +63,7 @@ export default function JobsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <UpdateBanner />
       <Text style={[styles.section, { color: t.sub }]}>TRABAJOS</Text>
       {state.jobs.length === 0 && state.categories.length === 0 ? (
         <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 24 }}>

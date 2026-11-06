@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { MonthGrid, Pill } from '@/components/MonthGrid';
-import { UpdateCard } from '@/components/UpdateCard';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { Button, Card } from '@/components/ui';
 import { formatLong, todayKey } from '@/lib/dates';
 import { useLayout } from '@/lib/layout';
@@ -90,7 +90,7 @@ export default function AgendaScreen() {
           {grid}
         </ScrollView>
         <ScrollView style={[styles.side, { borderLeftColor: t.border }]} contentContainerStyle={styles.column}>
-          <UpdateCard notice />
+          <UpdateBanner />
           {details}
         </ScrollView>
       </View>
@@ -99,7 +99,7 @@ export default function AgendaScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.content}>
-      <UpdateCard notice />
+      <UpdateBanner />
       {grid}
       {details}
     </ScrollView>

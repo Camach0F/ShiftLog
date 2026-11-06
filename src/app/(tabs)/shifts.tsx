@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MonthGrid, Pill } from '@/components/MonthGrid';
 import { TypePicker } from '@/components/TypePicker';
+import { UpdateBanner } from '@/components/UpdateBanner';
 import { Button, Card } from '@/components/ui';
 import { todayKey } from '@/lib/dates';
 import { byStart, formatDuration, formatMoney, resolveEntry, summarize, type Resolved } from '@/lib/hours';
@@ -79,6 +80,7 @@ export default function ShiftsScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={[styles.content, { maxWidth: contentMax }]}>
+        <UpdateBanner />
         {state.jobs.length === 0 && (
           <Card style={{ marginBottom: 8, gap: 10 }}>
             <Text style={{ color: t.text, fontWeight: '600' }}>Crea tu primer trabajo</Text>

@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useEffect } from 'react';
+import { AppState } from 'react-native';
 
 import { BackupAutoSave } from '@/components/BackupCard';
 import { CalendarAutoSync } from '@/components/CalendarCard';
@@ -8,7 +9,9 @@ import { WhatsNewAuto } from '@/components/WhatsNew';
 import { useLayout } from '@/lib/layout';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
-import { checkForUpdate } from '@/lib/updates';
+import { checkForUpdate, checkForUpdateIfStale } from '@/lib/updates';
+
+const RECHECK_AFTER_MS = 6 * 60 * 60 * 1000;
 
 export default function TabsLayout() {
   const t = useTheme();
@@ -19,6 +22,15 @@ export default function TabsLayout() {
   // Once per launch, after the saved settings are loaded.
   useEffect(() => {
     if (ready && checkUpdates) checkForUpdate();
+  }, [ready, checkUpdates]);
+
+  // An app left in the background for days looks again when it comes back.
+  useEffect(() => {
+    if (!ready || !checkUpdates) return;
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next === 'active') checkForUpdateIfStale(RECHECK_AFTER_MS);
+    });
+    return () => sub.remove();
   }, [ready, checkUpdates]);
 
   return (
