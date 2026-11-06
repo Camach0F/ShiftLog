@@ -1,0 +1,73 @@
+# Categories and calendar sync, part 1: group jobs in a category, add three agenda events and
+# connect the phone calendar (the test script creates it beforehand and checks what lands in it).
+appId: com.camach0f.shiftlog
+---
+- launchApp:
+    clearState: true
+
+# A category with a new job inside, then an existing job moved into it
+- tapOn: "Trabajos"
+- tapOn: "Nueva categoría"
+- tapOn: "Hostelería, Clientes.*"
+- inputText: "Restauración"
+- hideKeyboard
+- tapOn: "Guardar"
+- assertVisible: "Nuevo trabajo en esta categoría"
+- tapOn: "Nuevo trabajo en esta categoría"
+- tapOn: "Hostelería"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- assertVisible: "Comida"
+- pressKey: back
+- assertVisible: "TRABAJOS DE LA CATEGORÍA"
+- pressKey: back
+- tapOn: "Nuevo trabajo"
+- tapOn: "Oficina"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- pressKey: back
+- assertVisible: "Sin categoría"
+- takeScreenshot: 20-categorias
+- tapOn: "Editar la categoría Restauración"
+- assertVisible: "AÑADIR UN TRABAJO QUE YA TIENES"
+- tapOn: "Oficina"
+- assertVisible: "Sacar Oficina de la categoría"
+- takeScreenshot: 21-categoria
+- pressKey: back
+- assertNotVisible: "Sin categoría"
+
+# Three agenda events from the built-in templates: all day, 09:00 and 10:00
+- tapOn: "Agenda"
+- tapOn: "Nuevo evento"
+- tapOn: "Cumpleaños"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- tapOn: "Nuevo evento"
+- tapOn: "Reunión"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- tapOn: "Nuevo evento"
+- tapOn: "Médico"
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+
+# Connect the phone calendar
+- tapOn: "Trabajos"
+- scrollUntilVisible:
+    element: "Elegir calendario"
+- tapOn: "Elegir calendario"
+- tapOn:
+    text: "Allow|Permitir"
+    optional: true
+- assertVisible: "Elige el calendario"
+- takeScreenshot: 22-elegir-calendario
+- tapOn: "Prueba"
+- extendedWaitUntil:
+    visible: "3 eventos.*"
+    timeout: 20000
+- takeScreenshot: 23-calendario-sincronizado

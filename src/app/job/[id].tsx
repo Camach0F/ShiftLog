@@ -34,13 +34,16 @@ const hoursLabel = (s: { start: string; end: string; breakMin: number }) =>
 
 export default function JobScreen() {
   const t = useTheme();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, categoryId: categoryParam } = useLocalSearchParams<{ id: string; categoryId?: string }>();
   const { state, saveJob, deleteJob, saveType, saveTemplate, deleteTemplate } = useStore();
   const existing = state.jobs.find((j) => j.id === id);
   const types = existing ? state.types.filter((x) => x.jobId === existing.id) : [];
 
   const [name, setName] = useState(existing?.name ?? '');
   const [color, setColor] = useState(existing?.color ?? TYPE_COLORS[state.jobs.length % TYPE_COLORS.length]);
+  const [categoryId, setCategoryId] = useState<string | null>(
+    existing ? existing.categoryId : state.categories.some((c) => c.id === categoryParam) ? categoryParam! : null,
+  );
   const [payType, setPayType] = useState<PayType>(existing?.payType ?? 'hourly');
   const [rate, setRate] = useState(existing?.hourlyRate != null ? String(existing.hourlyRate) : '');
   const [fixedRate, setFixedRate] = useState(existing?.fixedRate != null ? String(existing.fixedRate) : '');
@@ -96,6 +99,7 @@ export default function JobScreen() {
       id: existing?.id ?? newId(),
       name: name.trim(),
       color,
+      categoryId,
       payType,
       hourlyRate: rateNum,
       fixedRate: fixedNum,
@@ -183,6 +187,18 @@ export default function JobScreen() {
             />
           ))}
         </View>
+
+        {state.categories.length > 0 && (
+          <>
+            <Text style={[styles.label, { color: t.sub }]}>Categoría</Text>
+            <View style={[styles.chips, { marginBottom: 18 }]}>
+              <Chip label="Ninguna" color={t.accent} selected={categoryId === null} onPress={() => setCategoryId(null)} />
+              {state.categories.map((c) => (
+                <Chip key={c.id} label={c.name} color={t.accent} selected={categoryId === c.id} onPress={() => setCategoryId(c.id)} />
+              ))}
+            </View>
+          </>
+        )}
 
         <Text style={[styles.label, { color: t.sub }]}>Se cobra</Text>
         <View style={[styles.chips, { marginBottom: 14 }]}>

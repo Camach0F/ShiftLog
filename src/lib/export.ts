@@ -2,8 +2,9 @@ import { File, Paths } from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-import { fromKey } from './dates';
+import { formatMonth, fromKey } from './dates';
 import { resolveEntry, summarize } from './hours';
+import { LOGO_DATA_URI } from './logo';
 import type { AppState } from './types';
 
 type Data = Pick<AppState, 'entries' | 'types' | 'jobs' | 'settings'>;
@@ -32,6 +33,17 @@ function rowsFor(data: Data, from: string, to: string, jobId: string | null): Ro
   return rows.sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
 }
 
+/** Which jobs a report covers: all of them, or those of one category (null = the uncategorized ones). */
+export type CategoryScope = 'all' | { categoryId: string | null };
+
+/** The data restricted to the jobs of a category; shifts of other jobs are left out. */
+export function inCategory(data: Data, scope: CategoryScope): Data {
+  if (scope === 'all') return data;
+  const jobs = data.jobs.filter((j) => (j.categoryId ?? null) === scope.categoryId);
+  const ids = new Set(jobs.map((j) => j.id));
+  return { ...data, jobs, entries: data.entries.filter((e) => ids.has(e.jobId)) };
+}
+
 const csvCell = (v: string) => (/[";\n\r]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
 // Spanish spreadsheets read ";" as separator and "," as decimal mark.
 const decimal = (n: number) => n.toFixed(2).replace('.', ',');
@@ -58,10 +70,11 @@ const longDuration = (min: number) => {
 };
 
 /**
- * A4 report: a title, then one row per day with a colored job label, the hours of each shift
- * and how long it lasted, weekends highlighted, and the total at the bottom. No logo or branding.
+ * A4 report: the app's logo and name, the period (and the category, if the report covers only
+ * one), then one row per day with a colored job label, the hours of each shift and how long it
+ * lasted, weekends highlighted, and the total at the bottom.
  */
-export function buildHtml(data: Data, from: string, to: string, label: string, jobId: string | null): string {
+export function buildHtml(data: Data, from: string, to: string, label: string, jobId: string | null, scope?: string): string {
   const rows = rowsFor(data, from, to, jobId);
   const totals = summarize(data, from, to, jobId);
 
@@ -91,7 +104,11 @@ export function buildHtml(data: Data, from: string, to: string, label: string, j
 
   return `<html><head><meta charset="utf-8" /><style>
     body { font-family: Helvetica, Arial, sans-serif; color: #171717; margin: 0; }
+    .brand { display: flex; align-items: center; margin-bottom: 20px; }
+    .logo { width: 34px; height: 34px; border-radius: 8px; margin-right: 10px; }
+    .app { font-size: 18px; font-weight: bold; color: #2F6BFF; }
     h1 { font-size: 22px; margin: 0 0 10px; }
+    .scope { font-size: 11px; color: #56565A; margin: -4px 0 10px; }
     .rule { height: 1.7px; background: #2F6BFF; }
     .head { font-size: 8px; font-weight: bold; color: #2F6BFF; margin: 14px 0 8px; display: flex; }
     .head span:first-child { width: 62px; }
@@ -109,7 +126,9 @@ export function buildHtml(data: Data, from: string, to: string, label: string, j
     .jobs { margin-top: 10px; font-size: 8.5px; color: #56565A; }
     .jobs div { display: flex; justify-content: space-between; padding: 2px 0; }
   </style></head><body>
+    <div class="brand"><img class="logo" src="${LOGO_DATA_URI}" /><span class="app">ShiftLog</span></div>
     <h1>${esc(label)}</h1>
+    ${scope ? `<div class="scope">${esc(scope)}</div>` : ''}
     <div class="rule"></div>
     <div class="head"><span>DÍA</span><span>TRABAJO</span></div>
     ${days || '<div class="empty">Sin turnos en este periodo.</div>'}
@@ -135,8 +154,15 @@ export async function shareCsv(csv: string, label: string) {
 const A4 = { width: 595, height: 842 };
 const MARGIN = 57;
 
-export async function sharePdf(html: string) {
+/** "ShiftLog - Noviembre 2026.pdf" for any day of that month. */
+export const pdfFileName = (anchor: string) => `ShiftLog - ${formatMonth(anchor).replace(' de ', ' ')}.pdf`;
+
+/** Prints the report to a PDF named after its month and opens the share sheet. */
+export async function sharePdf(html: string, fileName: string) {
   const page = html.replace('</style>', `body { padding: ${MARGIN}px; }</style>`);
   const { uri } = await Print.printToFileAsync({ html: page, ...A4 });
-  await shareFile(uri, 'application/pdf');
+  const named = new File(Paths.cache, fileName);
+  if (named.exists) named.delete();
+  await new File(uri).move(named);
+  await shareFile(named.uri, 'application/pdf');
 }

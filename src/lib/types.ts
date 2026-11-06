@@ -11,11 +11,19 @@ export type Overtime = {
 /** How a job is paid: by the hour, or a fixed price every time the job is added to the calendar. */
 export type PayType = 'hourly' | 'fixed';
 
+/** A group of jobs (a sector, a client, a type of work...). A job belongs to one category or none. */
+export type Category = {
+  id: string;
+  name: string;
+};
+
 /** An employer, client or workplace; owns its shift types, pay rate and overtime rules. */
 export type Job = {
   id: string;
   name: string;
   color: string;
+  /** The category the job is listed under; null = uncategorized */
+  categoryId: string | null;
   payType: PayType;
   /** Hourly rate, the same for every shift of the job; null = no pay tracking */
   hourlyRate: number | null;
@@ -106,6 +114,7 @@ export type Rotation = {
 };
 
 export type AppState = {
+  categories: Category[];
   jobs: Job[];
   types: ShiftType[];
   entries: ShiftEntry[];

@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="event/[id]" options={{ title: 'Evento' }} />
         <Stack.Screen name="job/[id]" options={{ title: 'Trabajo' }} />
+        <Stack.Screen name="category/[id]" options={{ title: 'Categoría' }} />
         <Stack.Screen name="day/[date]" options={{ title: 'Día' }} />
         <Stack.Screen name="entry/[id]" options={{ title: 'Turno' }} />
         <Stack.Screen name="type/[id]" options={{ title: 'Tipo de turno' }} />

@@ -56,11 +56,14 @@ appId: com.camach0f.shiftlog
 - assertVisible: "50.00 €"
 - takeScreenshot: 12-resumen
 - tapOn: "PDF"
+- assertVisible: "Generar PDF"
+- takeScreenshot: 13-pdf-opciones
+- tapOn: "Generar PDF"
+# The share sheet shows the file name
 - extendedWaitUntil:
-    visible: "PDF"
-    timeout: 5000
-    optional: true
-- takeScreenshot: 13-pdf
+    visible: "ShiftLog - .* [0-9]{4}.pdf"
+    timeout: 15000
+- takeScreenshot: 13b-pdf
 - pressKey: back
 - tapOn:
     text: "CSV.*"

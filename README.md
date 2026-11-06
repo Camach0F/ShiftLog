@@ -44,7 +44,7 @@ La app tiene dos partes separadas:
 - **Turnos, Resumen y Trabajos** – lo que sí cuenta como horas trabajadas.
 
 ### Trabajos y turnos
-- Varios **trabajos** (empleos o clientes), cada uno con nombre, color y forma de cobro: **por horas** (tarifa por hora y reglas de horas extra) o **por trabajo** (un precio fijo cada vez que lo añades al calendario).
+- Varios **trabajos** (empleos o clientes), que puedes agrupar en **categorías** (el resumen también muestra los subtotales de cada una), cada uno con nombre, color y forma de cobro: **por horas** (tarifa por hora y reglas de horas extra) o **por trabajo** (un precio fijo cada vez que lo añades al calendario).
 - Cada trabajo tiene sus **tipos de turno** (por ejemplo Mañana, Tarde, Noche): son plantillas con horario y un descanso opcional.
 - Los turnos son orientativos: al añadirlos a un día se pueden **ajustar las horas** solo para ese día, o usar «Otro horario» para escribir las tuyas.
 - Se pueden poner **varios turnos el mismo día**, también del mismo trabajo.
@@ -55,11 +55,12 @@ La app tiene dos partes separadas:
 ### Horas y resumen
 - Resumen por semana, mes o año, con desglose por trabajo y por turno.
 - **Horas extra** por trabajo (límite diario y semanal, con multiplicador de pago).
-- Exportación a **PDF** (informe por días) y **CSV**.
+- Exportación a **PDF** (informe por días con el logo de la app; eliges el mes y la categoría, y el archivo se llama «ShiftLog - Noviembre 2026.pdf») y a **CSV**.
 
 ### Agenda
 - Eventos de todo el día o con horas (se pueden tomar las horas de uno de tus turnos).
 - Plantillas de evento, también integradas y propias.
+- **Sincronización con el calendario del móvil** (opcional): los eventos de la agenda, y solo ellos, se copian en el calendario que elijas. Si es el de tu cuenta de Google, también aparecen en Google Calendar. Va en un solo sentido: lo que cambies en ShiftLog se actualiza allí.
 
 ### Copia de seguridad y actualizaciones
 - **Copia en Google Drive** (opcional): al conectar tu cuenta, los datos se guardan solos en una carpeta oculta de tu Drive y se pueden restaurar en otro móvil. Nunca se sobrescribe una copia de otra instalación sin preguntarte.

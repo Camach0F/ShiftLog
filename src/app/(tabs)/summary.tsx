@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { PdfDialog } from '@/components/PdfDialog';
 import { Button, Card, Chip } from '@/components/ui';
 import { rangeFor, shiftAnchor, todayKey, type RangeMode } from '@/lib/dates';
-import { buildCsv, buildHtml, shareCsv, sharePdf } from '@/lib/export';
+import { buildCsv, shareCsv } from '@/lib/export';
 import { formatDuration, formatMoney, summarize } from '@/lib/hours';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -22,6 +23,7 @@ export default function SummaryScreen() {
   const [mode, setMode] = useState<RangeMode>('month');
   const [anchor, setAnchor] = useState(todayKey());
   const [jobFilter, setJobFilter] = useState<string | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
   // A filter on a job that has since been deleted falls back to all jobs.
   const jobId = state.jobs.some((j) => j.id === jobFilter) ? jobFilter : null;
 
@@ -29,10 +31,17 @@ export default function SummaryScreen() {
   const totals = summarize(state, from, to, jobId);
   const maxMinutes = Math.max(1, ...totals.rows.map((r) => r.minutes));
 
-  const exportAs = async (kind: 'csv' | 'pdf') => {
+  // Subtotals of the jobs in each category; jobs without one are grouped last.
+  const categoryRows = [...state.categories.map((c) => ({ key: c.id, name: c.name })), { key: 'none', name: 'Sin categoría' }]
+    .map(({ key, name }) => {
+      const rows = totals.jobRows.filter((r) => (r.job.categoryId ?? 'none') === key);
+      return { key, name, minutes: rows.reduce((n, r) => n + r.minutes, 0), pay: rows.reduce((n, r) => n + r.pay, 0), jobs: rows.length };
+    })
+    .filter((r) => r.jobs > 0);
+
+  const exportCsv = async () => {
     try {
-      if (kind === 'csv') await shareCsv(buildCsv(state, from, to, jobId), label);
-      else await sharePdf(buildHtml(state, from, to, label, jobId));
+      await shareCsv(buildCsv(state, from, to, jobId), label);
     } catch (e) {
       Alert.alert('No se pudo exportar', e instanceof Error ? e.message : 'Inténtalo de nuevo.');
     }
@@ -105,6 +114,23 @@ export default function SummaryScreen() {
         </>
       )}
 
+      {jobId === null && categoryRows.length > 1 && (
+        <>
+          <Text style={[styles.section, { color: t.sub }]}>POR CATEGORÍA</Text>
+          <Card style={{ gap: 12 }}>
+            {categoryRows.map((r) => (
+              <View key={r.key} style={styles.rowTop}>
+                <Text style={{ color: t.text, fontWeight: '600' }}>{r.name}</Text>
+                <Text style={{ color: t.sub }}>
+                  {formatDuration(r.minutes)}
+                  {r.pay > 0 ? ` · ${formatMoney(r.pay, currency)}` : ''}
+                </Text>
+              </View>
+            ))}
+          </Card>
+        </>
+      )}
+
       <Text style={[styles.section, { color: t.sub }]}>POR TURNO</Text>
       {totals.rows.length === 0 ? (
         <Text style={{ color: t.sub, textAlign: 'center', marginTop: 12 }}>No hay turnos en este periodo.</Text>
@@ -129,15 +155,19 @@ export default function SummaryScreen() {
         </Card>
       )}
 
-      <Text style={[styles.section, { color: t.sub }]}>EXPORTAR {label.toUpperCase()}</Text>
+      <Text style={[styles.section, { color: t.sub }]}>EXPORTAR</Text>
       <View style={styles.exportRow}>
         <View style={{ flex: 1 }}>
-          <Button label="PDF" variant="secondary" onPress={() => exportAs('pdf')} />
+          <Button label="PDF" variant="secondary" onPress={() => setPdfOpen(true)} />
         </View>
         <View style={{ flex: 1 }}>
-          <Button label="CSV (Excel)" variant="secondary" onPress={() => exportAs('csv')} />
+          <Button label="CSV (Excel)" variant="secondary" onPress={exportCsv} />
         </View>
       </View>
+      <Text style={{ color: t.sub, fontSize: 12, marginTop: 8 }}>
+        El PDF te deja elegir el mes y la categoría. El CSV exporta el periodo que ves arriba ({label}).
+      </Text>
+      <PdfDialog visible={pdfOpen} initialAnchor={anchor} onClose={() => setPdfOpen(false)} />
     </ScrollView>
   );
 }

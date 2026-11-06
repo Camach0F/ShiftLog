@@ -1,6 +1,6 @@
 # Política de privacidad de ShiftLog
 
-Última actualización: 3 de noviembre de 2026.
+Última actualización: 6 de noviembre de 2026.
 
 ShiftLog es una app gratuita y de código abierto para Android. Esta política explica qué hace con tus datos. En resumen: **tus datos son tuyos, se quedan en tu dispositivo y no hay ningún servidor del autor de la app que los reciba.**
 
@@ -10,12 +10,16 @@ Tus trabajos, turnos, eventos de agenda, plantillas y ajustes. Se guardan única
 
 ## Qué hace la app con internet
 
-Solo hace dos cosas, y ambas son opcionales:
+Solo hace dos cosas con internet, y ambas son opcionales:
 
 1. **Buscar versiones nuevas.** Al abrir la app consulta la API pública de GitHub para saber si hay una versión más reciente y, si tú lo pides, descarga el APK desde las publicaciones de este repositorio. No se envía ningún dato tuyo. Se puede desactivar en Ajustes → Actualizaciones.
 2. **Copia de seguridad en Google Drive.** Solo si conectas tu cuenta de Google en Ajustes → Copia de seguridad. La app pide un único permiso, `drive.appdata`, que solo permite crear, leer y borrar archivos dentro de una carpeta oculta de tu propio Drive reservada a ShiftLog. La app no puede ver ni modificar ningún otro archivo de tu Drive, ni accede a tu correo, contactos u otros datos de tu cuenta, salvo la dirección de correo que muestra en Ajustes para indicar qué cuenta está conectada.
 
 La copia contiene tus datos de ShiftLog y viaja directamente entre tu dispositivo y tu Google Drive. El autor de la app no la recibe ni puede verla.
+
+## Calendario del móvil
+
+Es opcional y está desactivado por defecto. Si lo activas en Ajustes → Calendario del móvil, Android te pide permiso para leer y modificar los calendarios. ShiftLog lo usa solo para copiar los **eventos de tu agenda** (no los turnos, horas ni importes) en el calendario que elijas, y para actualizarlos o borrarlos cuando cambian en la app. Nunca lee tus otros eventos. Si ese calendario es el de tu cuenta de Google, es Android, no ShiftLog, quien lo sincroniza con Google Calendar. Puedes dejar de sincronizar cuando quieras y elegir si los eventos ya copiados se quitan del calendario.
 
 ## Uso de los datos de Google
 

@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { useEffect } from 'react';
 
 import { BackupAutoSave } from '@/components/BackupCard';
+import { CalendarAutoSync } from '@/components/CalendarCard';
 import { useLayout } from '@/lib/layout';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
@@ -22,6 +23,7 @@ export default function TabsLayout() {
   return (
     <>
       <BackupAutoSave />
+      <CalendarAutoSync />
       <Tabs
         screenOptions={{
           tabBarPosition: isWide ? 'left' : 'bottom',

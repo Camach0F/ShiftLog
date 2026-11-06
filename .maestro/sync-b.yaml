@@ -1,0 +1,17 @@
+# Calendar sync, part 2: editing and deleting agenda events must reach the calendar.
+appId: com.camach0f.shiftlog
+---
+- launchApp
+- tapOn: "Agenda"
+- tapOn: "Todo el día"
+- tapOn: "Opcional"
+- inputText: "Con tarta"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Guardar"
+- tapOn: "Guardar"
+- tapOn: "10:00 – 11:00"
+- scrollUntilVisible:
+    element: "Eliminar evento"
+- tapOn: "Eliminar evento"
+- assertNotVisible: "10:00 – 11:00"

@@ -3,10 +3,12 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { BackupCard } from '@/components/BackupCard';
+import { CalendarCard } from '@/components/CalendarCard';
 import { UpdateCard } from '@/components/UpdateCard';
 import { Button, Card, Field } from '@/components/ui';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
+import type { Category, Job } from '@/lib/types';
 
 const SHARE_MESSAGE =
   'ShiftLog: agenda y turnos de trabajo para Android. Gratis, sin anuncios y de código abierto.\nDescárgala aquí: https://github.com/Camach0F/ShiftLog/releases/latest';
@@ -20,10 +22,45 @@ export default function JobsScreen() {
     return state.jobs.find((j) => j.id === type?.jobId)?.color;
   };
 
+  const jobRow = (job: Job, i: number) => {
+    const count = state.types.filter((x) => x.jobId === job.id).length;
+    return (
+      <Pressable
+        key={job.id}
+        android_ripple={{ color: t.border }}
+        onPress={() => router.push({ pathname: '/job/[id]', params: { id: job.id } })}
+        style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
+      >
+        <View style={[styles.dot, { backgroundColor: job.color }]} />
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{job.name}</Text>
+          <Text style={{ color: t.sub }}>
+            {count} {count === 1 ? 'tipo de turno' : 'tipos de turno'}
+            {job.payType === 'fixed'
+              ? job.fixedRate != null
+                ? ` · ${job.fixedRate} ${currency} por trabajo`
+                : ''
+              : job.hourlyRate != null
+                ? ` · ${job.hourlyRate} ${currency}/h`
+                : ''}
+            {job.payType !== 'fixed' && job.overtime.enabled ? ' · horas extra' : ''}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={t.sub} />
+      </Pressable>
+    );
+  };
+
+  // Jobs grouped under their category; those without one come last (and only show when needed).
+  const groups: { category: Category | null; jobs: Job[] }[] = [
+    ...state.categories.map((category) => ({ category, jobs: state.jobs.filter((j) => j.categoryId === category.id) })),
+    { category: null, jobs: state.jobs.filter((j) => !j.categoryId) },
+  ].filter((g) => g.category !== null || g.jobs.length > 0);
+
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <Text style={[styles.section, { color: t.sub }]}>TRABAJOS</Text>
-      {state.jobs.length === 0 ? (
+      {state.jobs.length === 0 && state.categories.length === 0 ? (
         <Card style={{ alignItems: 'center', gap: 6, paddingVertical: 24 }}>
           <Ionicons name="briefcase-outline" size={32} color={t.sub} />
           <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>Aún no tienes trabajos</Text>
@@ -32,39 +69,35 @@ export default function JobsScreen() {
           </Text>
         </Card>
       ) : (
-        <Card style={{ padding: 0 }}>
-          {state.jobs.map((job, i) => {
-            const count = state.types.filter((x) => x.jobId === job.id).length;
-            return (
-              <Pressable
-                key={job.id}
-                android_ripple={{ color: t.border }}
-                onPress={() => router.push({ pathname: '/job/[id]', params: { id: job.id } })}
-                style={[styles.row, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: t.border }]}
-              >
-                <View style={[styles.dot, { backgroundColor: job.color }]} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: t.text, fontSize: 16, fontWeight: '600' }}>{job.name}</Text>
-                  <Text style={{ color: t.sub }}>
-                    {count} {count === 1 ? 'tipo de turno' : 'tipos de turno'}
-                    {job.payType === 'fixed'
-                      ? job.fixedRate != null
-                        ? ` · ${job.fixedRate} ${currency} por trabajo`
-                        : ''
-                      : job.hourlyRate != null
-                        ? ` · ${job.hourlyRate} ${currency}/h`
-                        : ''}
-                    {job.payType !== 'fixed' && job.overtime.enabled ? ' · horas extra' : ''}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={t.sub} />
-              </Pressable>
-            );
-          })}
-        </Card>
+        groups.map(({ category, jobs }) => (
+          <View key={category?.id ?? 'none'} style={{ marginBottom: 14 }}>
+            {state.categories.length > 0 && (
+              <View style={styles.groupHeader}>
+                <Text style={[styles.groupTitle, { color: t.text }]}>{category ? category.name : 'Sin categoría'}</Text>
+                {category && (
+                  <Pressable
+                    accessibilityLabel={`Editar la categoría ${category.name}`}
+                    hitSlop={10}
+                    onPress={() => router.push({ pathname: '/category/[id]', params: { id: category.id } })}
+                  >
+                    <Ionicons name="create-outline" size={20} color={t.accent} />
+                  </Pressable>
+                )}
+              </View>
+            )}
+            {jobs.length === 0 ? (
+              <Text style={{ color: t.sub, marginLeft: 4 }}>Sin trabajos. Toca el lápiz para añadir alguno.</Text>
+            ) : (
+              <Card style={{ padding: 0 }}>{jobs.map(jobRow)}</Card>
+            )}
+          </View>
+        ))
       )}
       <View style={{ marginTop: 12 }}>
         <Button label="Nuevo trabajo" onPress={() => router.push({ pathname: '/job/[id]', params: { id: 'new' } })} />
+      </View>
+      <View style={{ marginTop: 10 }}>
+        <Button label="Nueva categoría" variant="secondary" onPress={() => router.push({ pathname: '/category/[id]', params: { id: 'new' } })} />
       </View>
 
       <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>ROTACIONES</Text>
@@ -118,6 +151,11 @@ export default function JobsScreen() {
         </View>
       </Card>
 
+      <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>CALENDARIO DEL MÓVIL</Text>
+      <Card>
+        <CalendarCard />
+      </Card>
+
       <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>COPIA DE SEGURIDAD</Text>
       <Card>
         <BackupCard />
@@ -154,6 +192,8 @@ const styles = StyleSheet.create({
   section: { fontSize: 12, marginBottom: 8, marginLeft: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
   dot: { width: 16, height: 16, borderRadius: 8 },
+  groupHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, marginHorizontal: 4 },
+  groupTitle: { fontSize: 15, fontWeight: '700' },
   dots: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 },
   miniDot: { width: 12, height: 12, borderRadius: 6 },
   pair: { flexDirection: 'row', gap: 12 },

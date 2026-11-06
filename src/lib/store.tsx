@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useReducer, useState, type ReactNode } from 'react';
 
-import type { AgendaEvent, AppState, EventTemplate, Job, JobTemplate, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
+import type { AgendaEvent, AppState, Category, EventTemplate, Job, JobTemplate, Overtime, Rotation, Settings, ShiftEntry, ShiftType } from './types';
 
 const STORAGE_KEY = 'shiftlog:v1';
 
@@ -19,6 +19,7 @@ export const entryFromType = (type: ShiftType, date: string): ShiftEntry => ({
 export const defaultOvertime: Overtime = { enabled: false, dailyHours: null, weeklyHours: 40, multiplier: 1.5 };
 
 const initialState: AppState = {
+  categories: [],
   jobs: [],
   types: [],
   entries: [],
@@ -34,6 +35,8 @@ type Action =
   | { type: 'saveEntry'; entry: ShiftEntry }
   | { type: 'deleteEntry'; id: string }
   | { type: 'applyEntries'; add: ShiftEntry[]; removeIds: string[] }
+  | { type: 'saveCategory'; category: Category }
+  | { type: 'deleteCategory'; id: string }
   | { type: 'saveJob'; job: Job }
   | { type: 'deleteJob'; id: string }
   | { type: 'saveType'; shiftType: ShiftType }
@@ -72,6 +75,14 @@ function reducer(state: AppState, action: Action): AppState {
       const remove = new Set(action.removeIds);
       return { ...state, entries: [...state.entries.filter((e) => !remove.has(e.id)), ...action.add] };
     }
+    case 'saveCategory':
+      return { ...state, categories: upsert(state.categories, action.category) };
+    case 'deleteCategory':
+      return {
+        ...state,
+        categories: state.categories.filter((c) => c.id !== action.id),
+        jobs: state.jobs.map((j) => (j.categoryId === action.id ? { ...j, categoryId: null } : j)),
+      };
     case 'saveJob':
       return { ...state, jobs: upsert(state.jobs, action.job) };
     case 'deleteJob': {
@@ -115,6 +126,8 @@ type Store = {
   saveEntry: (entry: ShiftEntry) => void;
   deleteEntry: (id: string) => void;
   applyEntries: (add: ShiftEntry[], removeIds: string[]) => void;
+  saveCategory: (category: Category) => void;
+  deleteCategory: (id: string) => void;
   saveJob: (job: Job) => void;
   deleteJob: (id: string) => void;
   saveType: (shiftType: ShiftType) => void;
@@ -156,6 +169,7 @@ function migrate(saved: Record<string, any>): AppState {
         id: 'default',
         name: 'Mi trabajo',
         color: '#3B82F6',
+        categoryId: null,
         payType: 'hourly',
         hourlyRate: null,
         fixedRate: null,
@@ -168,8 +182,11 @@ function migrate(saved: Record<string, any>): AppState {
   // A job without a rate takes the first one set on its shift types, so existing pay is not lost.
   type OldType = ShiftType & { color?: string; hourlyRate?: number | null };
   const oldTypes = state.types as OldType[];
+  // Jobs used to have no categories; one pointing at a category that no longer exists becomes uncategorized.
+  const categoryIds = new Set(state.categories.map((c) => c.id));
   state.jobs = state.jobs.map((job) => ({
     ...job,
+    categoryId: job.categoryId && categoryIds.has(job.categoryId) ? job.categoryId : null,
     payType: job.payType ?? 'hourly',
     fixedRate: job.fixedRate ?? null,
     hourlyRate: job.hourlyRate ?? oldTypes.find((x) => x.jobId === job.id && x.hourlyRate != null)?.hourlyRate ?? null,
@@ -211,6 +228,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       saveEntry: (entry) => dispatch({ type: 'saveEntry', entry }),
       deleteEntry: (id) => dispatch({ type: 'deleteEntry', id }),
       applyEntries: (add, removeIds) => dispatch({ type: 'applyEntries', add, removeIds }),
+      saveCategory: (category) => dispatch({ type: 'saveCategory', category }),
+      deleteCategory: (id) => dispatch({ type: 'deleteCategory', id }),
       saveJob: (job) => dispatch({ type: 'saveJob', job }),
       deleteJob: (id) => dispatch({ type: 'deleteJob', id }),
       saveType: (shiftType) => dispatch({ type: 'saveType', shiftType }),
