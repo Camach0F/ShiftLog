@@ -28,13 +28,15 @@ if (missing.length > 0) {
 const changes = releaseFor(version)?.changes ?? [];
 const test = Boolean(process.env.DISCORD_TEST);
 
-// Each change reads "Title: text" in the app; here the title gets bold and an emoji.
+// Each change reads "Title: text" in the app; here the title gets bold and an emoji, and the text
+// after the dash starts with a capital letter.
 const EMOJIS = { categorías: '🗂️', calendario: '📅', pdf: '📄', actualizaciones: '🔄', guía: '🧭', novedades: '🔔', 'primera versión': '🎉' };
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 const line = (change) => {
   const [head, ...rest] = change.split(': ');
   const title = rest.length > 0 ? head : '';
   const emoji = EMOJIS[title.toLowerCase()] ?? '✨';
-  return title ? `${emoji} **${title}** — ${rest.join(': ')}` : `${emoji} ${change}`;
+  return title ? `${emoji} **${title}** — ${capitalize(rest.join(': '))}` : `${emoji} ${change}`;
 };
 
 const description = [
