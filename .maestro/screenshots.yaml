@@ -6,28 +6,13 @@ appId: com.camach0f.shiftlog
 - launchApp:
     clearState: true
 
-# Two categories
+# Two jobs from templates
 - tapOn: "Trabajos"
-- tapOn: "Nueva categoría"
-- tapOn: "Hostelería, Clientes.*"
-- inputText: "Trabajo principal"
-- hideKeyboard
-- tapOn: "Guardar"
-- pressKey: back
-- tapOn: "Nueva categoría"
-- tapOn: "Hostelería, Clientes.*"
-- inputText: "Extras"
-- hideKeyboard
-- tapOn: "Guardar"
-- pressKey: back
-
-# Two jobs from templates, one in each category
 - tapOn: "Nuevo trabajo"
 - tapOn: "Turnos rotativos"
 - tapOn: "Sin tarifa"
 - inputText: "12"
 - hideKeyboard
-- tapOn: "Trabajo principal"
 - scrollUntilVisible:
     element: "Guardar"
 - tapOn: "Guardar"
@@ -35,10 +20,25 @@ appId: com.camach0f.shiftlog
 - pressKey: back
 - tapOn: "Nuevo trabajo"
 - tapOn: "Hostelería"
-- tapOn: "Extras"
 - scrollUntilVisible:
     element: "Guardar"
 - tapOn: "Guardar"
+- pressKey: back
+
+# Two categories, one job in each (on the category page, tapping a job moves it there)
+- tapOn: "Nueva categoría"
+- tapOn: "Hostelería, Clientes.*"
+- inputText: "Trabajo principal"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Turnos rotativos"
+- pressKey: back
+- tapOn: "Nueva categoría"
+- tapOn: "Hostelería, Clientes.*"
+- inputText: "Extras"
+- hideKeyboard
+- tapOn: "Guardar"
+- tapOn: "Hostelería"
 - pressKey: back
 
 # Shifts on the calendar
