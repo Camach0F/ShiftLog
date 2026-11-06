@@ -41,6 +41,8 @@ const line = (change) => {
 
 // The channel where members pick up the role that is mentioned above the embed.
 const ROLE_CHANNEL_ID = '1567328874281574451';
+// Support tickets are opened here, and they also need the role.
+const TICKETS_CHANNEL_ID = '1567345394482941952';
 
 const description = [
   `## 🚀 ¡Ya está aquí la V${version}!`,
@@ -49,7 +51,7 @@ const description = [
   '📲 **Cómo actualizar:** desde la propia app en **Ajustes → Actualizaciones**, o con el botón de abajo. Tus datos se conservan.',
   `🔔 **Recibe los avisos:** para enterarte de cada versión, consigue el rol <@&${role}> en <#${ROLE_CHANNEL_ID}>.`,
   '💙 **Apoya el proyecto:** ShiftLog es gratis y sin anuncios. Si te gusta, puedes apoyarlo con una donación única del importe que quieras, sin suscripciones, con los botones de abajo.',
-  '💬 ¿Dudas o algún fallo? Escríbenos aquí, estamos dando soporte en este Discord.',
+  `💬 **¿Dudas o algún fallo?** Estamos dando soporte en este Discord: abre un ticket en <#${TICKETS_CHANNEL_ID}>. También necesitas el rol <@&${role}>.`,
 ].join('\n\n');
 
 const payload = {
