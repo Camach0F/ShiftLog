@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui';
 import { DISCORD_URL } from '@/lib/links';
@@ -18,6 +19,7 @@ export function TourHost() {
   const { state, ready } = useStore();
   const { open } = useTourState();
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const startedAt = useRef('/');
   const hasData = state.jobs.length + state.entries.length + state.events.length > 0;
@@ -58,7 +60,8 @@ export function TourHost() {
 
   return (
     <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
-      <View style={styles.backdrop}>
+      {/* The card sits at the bottom: keep it clear of the navigation bar (and the taskbar of tablets). */}
+      <View style={[styles.backdrop, { paddingBottom: 16 + insets.bottom }]}>
         <View style={[styles.card, { backgroundColor: t.card }]}>
           <View style={styles.top}>
             <Text style={{ color: t.sub, fontSize: 12 }}>

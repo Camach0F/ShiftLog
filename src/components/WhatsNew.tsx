@@ -19,7 +19,7 @@ export function WhatsNewDialog({ visible, release, onClose }: { visible: boolean
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={[styles.sheet, { backgroundColor: t.card }]}>
-          <ScrollView>
+          <ScrollView style={{ flexShrink: 1 }}>
             <Text style={[styles.title, { color: t.text }]}>Novedades de la versión {release.version}</Text>
             <View style={{ gap: 8 }}>
               {release.changes.map((change) => (
@@ -49,11 +49,11 @@ export function WhatsNewDialog({ visible, release, onClose }: { visible: boolean
                 </View>
               </View>
             </View>
-            <View style={{ marginTop: 16, gap: 10 }}>
-              <Button label="Unirme al Discord" variant="secondary" onPress={() => Linking.openURL(DISCORD_URL).catch(() => {})} />
-              <Button label="Aceptar" onPress={onClose} />
-            </View>
           </ScrollView>
+          <View style={{ marginTop: 16, gap: 10 }}>
+            <Button label="Unirme al Discord" variant="secondary" onPress={() => Linking.openURL(DISCORD_URL).catch(() => {})} />
+            <Button label="Aceptar" onPress={onClose} />
+          </View>
         </View>
       </View>
     </Modal>
