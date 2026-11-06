@@ -29,6 +29,18 @@ calendar_events() {
   cat "$1"
 }
 
+# The app syncs a moment after a change, and a slow emulator takes longer: look again for up to 45 s
+# before judging (the last look is the one that is printed and counts).
+check_calendar() {
+  for _ in 1 2 3 4 5 6 7 8 9; do
+    calendar_events "$2" > /dev/null
+    python3 "$ROOT/scripts/check-calendar.py" "$1" "$2" > /dev/null && break
+    sleep 5
+  done
+  calendar_events "$2"
+  python3 "$ROOT/scripts/check-calendar.py" "$1" "$2"
+}
+
 status=0
 cd "$OUT/shots"
 if [ "${SCREENSHOTS:-}" = 1 ]; then FLOW=screenshots; else FLOW=light; fi
@@ -39,13 +51,9 @@ maestro test --test-output-dir "$OUT/maestro-light" "$ROOT/.maestro/$FLOW.yaml" 
 if [ "${SCREENSHOTS:-}" != 1 ]; then
   adb shell "content insert --uri 'content://com.android.calendar/calendars?caller_is_syncadapter=true&account_name=ShiftLogTest&account_type=LOCAL' --bind account_name:s:ShiftLogTest --bind account_type:s:LOCAL --bind name:s:Prueba --bind calendar_displayName:s:Prueba --bind ownerAccount:s:ShiftLogTest --bind calendar_color:i:-16776961 --bind calendar_access_level:i:700 --bind visible:i:1 --bind sync_events:i:1" || status=1
   maestro test --test-output-dir "$OUT/maestro-sync-a" "$ROOT/.maestro/sync-a.yaml" || status=$?
-  sleep 5
-  calendar_events "$OUT/calendar-1.txt"
-  python3 "$ROOT/scripts/check-calendar.py" 1 "$OUT/calendar-1.txt" || status=1
+  check_calendar 1 "$OUT/calendar-1.txt" || status=1
   maestro test --test-output-dir "$OUT/maestro-sync-b" "$ROOT/.maestro/sync-b.yaml" || status=$?
-  sleep 8
-  calendar_events "$OUT/calendar-2.txt"
-  python3 "$ROOT/scripts/check-calendar.py" 2 "$OUT/calendar-2.txt" || status=1
+  check_calendar 2 "$OUT/calendar-2.txt" || status=1
 fi
 adb shell cmd uimode night yes
 maestro test --test-output-dir "$OUT/maestro-dark" "$ROOT/.maestro/dark.yaml" || status=$?
