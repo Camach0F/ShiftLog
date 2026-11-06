@@ -2,11 +2,13 @@
 // version (from src/lib/changelog.ts), a button to download the APK and, if set, a role mention.
 //
 // Environment: DISCORD_WEBHOOK_URL (secret), VERSION (e.g. 1.0.1), and optionally
-// DISCORD_ROLE_ID (role to mention) and DISCORD_IMAGE_URL (image of the embed).
+// DISCORD_ROLE_ID (another role to mention) and DISCORD_IMAGE_URL (image of the embed).
 // Run with `node --experimental-strip-types scripts/announce-discord.mjs [--dry-run]`.
 import { releaseFor } from '../src/lib/changelog.ts';
 
-const { DISCORD_WEBHOOK_URL: webhook, VERSION: version, DISCORD_ROLE_ID: role, DISCORD_IMAGE_URL: image } = process.env;
+const { DISCORD_WEBHOOK_URL: webhook, VERSION: version, DISCORD_IMAGE_URL: image } = process.env;
+// The role that gets the announcement (a role id is not a secret).
+const role = process.env.DISCORD_ROLE_ID || '1567309930317484266';
 const repo = 'https://github.com/Camach0F/ShiftLog';
 const dryRun = process.argv.includes('--dry-run');
 
@@ -22,9 +24,9 @@ const description = [
 ].join('\n\n');
 
 const payload = {
-  ...(role && { content: `<@&${role}>` }),
+  content: `[<@&${role}>]`,
   // Only the role given above can be mentioned, whatever the text says.
-  allowed_mentions: role ? { roles: [role] } : { parse: [] },
+  allowed_mentions: { roles: [role] },
   embeds: [
     {
       title: `ShiftLog V${version}`,
