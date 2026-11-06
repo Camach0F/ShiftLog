@@ -10,6 +10,7 @@ const { DISCORD_WEBHOOK_URL: webhook, VERSION: version, DISCORD_IMAGE_URL: image
 // The role that gets the announcement (a role id is not a secret).
 const role = process.env.DISCORD_ROLE_ID || '1567309930317484266';
 const repo = 'https://github.com/Camach0F/ShiftLog';
+const rawRepo = 'https://raw.githubusercontent.com/Camach0F/ShiftLog/main';
 const dryRun = process.argv.includes('--dry-run');
 
 if (!version || (!webhook && !dryRun)) {
@@ -18,28 +19,45 @@ if (!version || (!webhook && !dryRun)) {
 }
 
 const changes = releaseFor(version)?.changes ?? [];
+const test = Boolean(process.env.DISCORD_TEST);
+
+// Each change reads "Title: text" in the app; here the title gets bold and an emoji.
+const EMOJIS = { categorías: '🗂️', calendario: '📅', pdf: '📄', actualizaciones: '🔄', novedades: '🔔', 'primera versión': '🎉' };
+const line = (change) => {
+  const [head, ...rest] = change.split(': ');
+  const title = rest.length > 0 ? head : '';
+  const emoji = EMOJIS[title.toLowerCase()] ?? '✨';
+  return title ? `${emoji} **${title}** — ${rest.join(': ')}` : `${emoji} ${change}`;
+};
+
 const description = [
-  changes.length > 0 ? changes.map((c) => `• ${c}`).join('\n') : 'Ya hay una versión nueva de ShiftLog.',
-  'Puedes actualizar desde la propia app (Ajustes → Actualizaciones) o con el botón de abajo.',
+  `## 🚀 ¡Ya está aquí la V${version}!`,
+  changes.length > 0 ? changes.map(line).join('\n\n') : '✨ Ya hay una versión nueva de ShiftLog.',
+  '━━━━━━━━━━━━━━━━━━',
+  '📲 **Cómo actualizar:** desde la propia app en **Ajustes → Actualizaciones**, o con el botón de abajo. Tus datos se conservan.',
+  '💬 ¿Dudas o algún fallo? Escríbenos aquí, estamos dando soporte en este Discord.',
 ].join('\n\n');
 
 const payload = {
   content: `[<@&${role}>]`,
   // Only the role given above can be mentioned, whatever the text says.
-  allowed_mentions: { roles: [role] },
+  // In a test the mention is shown but nobody is notified.
+  allowed_mentions: test ? { parse: [] } : { roles: [role] },
   embeds: [
     {
-      title: `ShiftLog V${version}`,
+      title: `ShiftLog V${version}${test ? ' (prueba)' : ''}`,
       url: `${repo}/releases/tag/v${version}`,
       description,
       color: 0x2f6bff,
+      footer: { text: 'ShiftLog · Gratis, sin anuncios y de código abierto', icon_url: `${rawRepo}/assets/icon.png` },
+      timestamp: new Date().toISOString(),
       ...(image && { image: { url: image } }),
     },
   ],
   components: [
     {
       type: 1,
-      components: [{ type: 2, style: 5, label: `Descargar V${version}`, url: `${repo}/releases/download/v${version}/ShiftLog.apk` }],
+      components: [{ type: 2, style: 5, label: `Descargar V${version}`, url: test ? `${repo}/releases/latest/download/ShiftLog.apk` : `${repo}/releases/download/v${version}/ShiftLog.apk` }],
     },
   ],
 };
