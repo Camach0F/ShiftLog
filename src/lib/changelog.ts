@@ -9,7 +9,7 @@ export const CHANGELOG: Release[] = [
   {
     version: '1.0.1',
     changes: [
-      'Categorías: agrupa tus trabajos y consulta en el Resumen los subtotales de cada una.',
+      'Categorías: agrupa tus trabajos y consulta en el Resumen un informe de cada una, con su propio PDF.',
       'Calendario: los eventos de la agenda (no los turnos) pueden copiarse al calendario del móvil y, desde ahí, a Google Calendar.',
       'PDF: ahora eliges el mes y la categoría, lleva el logo de ShiftLog y el archivo se llama «ShiftLog - Hostelería Noviembre 2026».',
       'Guía: un recorrido por la app para que no te pierdas. Sale al instalarla y puedes volver a verla en Ajustes.',
