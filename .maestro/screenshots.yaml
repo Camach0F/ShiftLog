@@ -5,10 +5,15 @@ appId: com.camach0f.shiftlog
 ---
 - launchApp:
     clearState: true
-# The guide opens by itself on a fresh install: skip it
+# The guide opens by itself on a fresh install: a screenshot of its second step, then skip it
 - extendedWaitUntil:
-    visible: "Saltar guía"
+    visible: "Te damos la bienvenida a ShiftLog"
     timeout: 20000
+- tapOn: "Siguiente"
+- extendedWaitUntil:
+    visible: "1. Crea tu trabajo"
+    timeout: 10000
+- takeScreenshot: shot-guia
 - tapOn: "Saltar guía"
 
 # Two jobs from templates
