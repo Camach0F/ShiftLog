@@ -19,17 +19,22 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "permissions": [
-        "android.permission.REQUEST_INSTALL_PACKAGES"
+        "android.permission.REQUEST_INSTALL_PACKAGES",
+        "android.permission.POST_NOTIFICATIONS"
       ],
       "predictiveBackGestureEnabled": false,
-      "versionCode": 1
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json"
     },
     "plugins": [
       "expo-router",
       "expo-font",
       "expo-sharing",
       "expo-calendar",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
+      "./plugins/withNotificationIcon"
     ]
   }
 }

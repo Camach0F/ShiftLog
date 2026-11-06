@@ -10,10 +10,12 @@ Tus trabajos, turnos, eventos de agenda, plantillas y ajustes. Se guardan única
 
 ## Qué hace la app con internet
 
-Solo hace dos cosas con internet, y ambas son opcionales:
+Solo hace tres cosas con internet, y las tres son opcionales:
 
 1. **Buscar versiones nuevas.** Al abrir la app consulta la API pública de GitHub para saber si hay una versión más reciente y, si tú lo pides, descarga el APK desde las publicaciones de este repositorio. No se envía ningún dato tuyo. Se puede desactivar en Ajustes → Actualizaciones.
 2. **Copia de seguridad en Google Drive.** Solo si conectas tu cuenta de Google en Ajustes → Copia de seguridad. La app pide un único permiso, `drive.appdata`, que solo permite crear, leer y borrar archivos dentro de una carpeta oculta de tu propio Drive reservada a ShiftLog. La app no puede ver ni modificar ningún otro archivo de tu Drive, ni accede a tu correo, contactos u otros datos de tu cuenta, salvo la dirección de correo que muestra en Ajustes para indicar qué cuenta está conectada.
+
+3. **Avisos de versiones nuevas.** Mientras «Avisar de versiones nuevas» esté activado (lo está por defecto), el móvil se suscribe a un tema llamado `updates` de Firebase Cloud Messaging, un servicio de Google, para recibir una notificación cuando se publica una versión. Para ello Google asigna al móvil un identificador de instalación de Firebase. ShiftLog no lo guarda ni lo envía a ningún sitio, y el aviso es el mismo para todos: no se envía ningún dato tuyo ni de tus turnos. Se desactiva en Ajustes → Actualizaciones, que cancela la suscripción, o negando el permiso de notificaciones de Android.
 
 La copia contiene tus datos de ShiftLog y viaja directamente entre tu dispositivo y tu Google Drive. El autor de la app no la recibe ni puede verla.
 

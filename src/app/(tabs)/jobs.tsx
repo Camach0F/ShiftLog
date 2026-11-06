@@ -175,7 +175,7 @@ export default function JobsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={{ color: t.text, fontSize: 16 }}>Avisar de versiones nuevas</Text>
             <Text style={{ color: t.sub, fontSize: 12 }}>
-              Al abrir la app consulta en GitHub si hay una versión nueva. No se envía ningún dato tuyo.
+              Te avisa con una notificación cuando sale una versión nueva y, al abrir la app, consulta en GitHub si hay alguna. No se envía ningún dato tuyo.
             </Text>
           </View>
           <Switch value={checkUpdates} onValueChange={(v) => setSettings({ checkUpdates: v })} />

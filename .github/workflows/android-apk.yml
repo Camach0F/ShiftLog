@@ -18,6 +18,8 @@ jobs:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      # The Firebase config of the app (push notifications); it is not committed
+      GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
       # Optional: announce releases on Discord (the webhook URL is a secret)
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       # Optional: push notification to the phones that have the app (service account key of the Firebase project)
@@ -25,9 +27,9 @@ jobs:
     steps:
       - name: Check the signing secrets exist
         run: |
-          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS; do
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS GOOGLE_SERVICES_JSON_BASE64; do
             if [ -z "${!name}" ]; then
-              echo "::error::Missing secret $name. Run scripts/create-signing-key.sh once (its header explains what it does)."
+              echo "::error::Missing secret $name. For the signing ones, run scripts/create-signing-key.sh once (its header explains what it does)."
               exit 1
             fi
           done
@@ -55,6 +57,9 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - run: npm ci
+
+      - name: Write the Firebase config
+        run: echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > google-services.json
 
       - name: Generate the Android project
         run: npx expo prebuild --platform android --no-install

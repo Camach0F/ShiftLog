@@ -4,6 +4,9 @@ appId: com.camach0f.shiftlog
 ---
 - launchApp:
     clearState: true
+    # The app asks for it after the guide; granting it here keeps the dialog out of the way
+    permissions:
+      notifications: allow
 
 # The guide opens by itself on a fresh install: go through every step
 - extendedWaitUntil:
