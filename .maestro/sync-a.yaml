@@ -19,6 +19,8 @@ appId: com.camach0f.shiftlog
 - tapOn: "Hostelería, Clientes.*"
 - inputText: "Restauración"
 - hideKeyboard
+- scrollUntilVisible:
+    element: "Guardar"
 - tapOn: "Guardar"
 - assertVisible: "Nuevo trabajo en esta categoría"
 - tapOn: "Nuevo trabajo en esta categoría"

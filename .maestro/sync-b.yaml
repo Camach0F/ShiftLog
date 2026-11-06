@@ -19,4 +19,6 @@ appId: com.camach0f.shiftlog
 - scrollUntilVisible:
     element: "Eliminar evento"
 - tapOn: "Eliminar evento"
+# Back on the agenda (the editor has fields with a 10:00 of their own), and the event is gone
+- assertVisible: "Nuevo evento"
 - assertNotVisible: "10:00 – 11:00"
