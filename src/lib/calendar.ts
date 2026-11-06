@@ -150,13 +150,30 @@ const RETRY_DELAYS_MS = [5000, 30000, 120000];
 let attempt = 0;
 let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
+/** A call to the calendar provider that never answers (it was frozen or killed) must not block every later sync. */
+function withTimeout<T>(promise: Promise<T>, label: string, ms = 15000): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`timeout: ${label}`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 const isMissing = (e: unknown) =>
   /NOT_FOUND/i.test(String((e as { code?: string })?.code ?? '')) || /not found|could not be found/i.test(String((e as Error)?.message ?? ''));
 
 /** The calendar event of a link, or null if it is gone; any other failure (the provider restarting...) is thrown. */
 async function find(id: string): Promise<Calendar.ExpoCalendarEvent | null> {
   try {
-    return await Calendar.ExpoCalendarEvent.get(id);
+    return await withTimeout(Calendar.ExpoCalendarEvent.get(id), 'get');
   } catch (e) {
     if (isMissing(e)) return null;
     throw e;
@@ -169,7 +186,7 @@ async function find(id: string): Promise<Calendar.ExpoCalendarEvent | null> {
  */
 async function drop(key: string): Promise<void> {
   const event = await find(meta.linked[key].id);
-  if (event) await event.delete();
+  if (event) await withTimeout(event.delete(), 'delete');
   delete meta.linked[key];
 }
 
@@ -201,13 +218,13 @@ async function reconcile(events: AgendaEvent[]): Promise<void> {
     if (link) {
       const existing = await find(link.id);
       if (existing) {
-        await existing.update(details(event));
+        await withTimeout(existing.update(details(event)), 'update');
         meta.linked[event.id] = { id: link.id, sig };
         continue;
       }
       // The event was deleted from the calendar by hand: write it again.
     }
-    const created = await calendar.createEvent(details(event));
+    const created = await withTimeout(calendar.createEvent(details(event)), 'create');
     meta.linked[event.id] = { id: created.id, sig };
   }
 }
@@ -223,12 +240,15 @@ export async function syncEvents(events: AgendaEvent[]): Promise<void> {
   if (retryTimer) clearTimeout(retryTimer);
   retryTimer = null;
   publish({ busy: true, error: null });
+  console.log('[calendar-sync] start', events.length, 'events,', Object.keys(meta.linked).length, 'linked');
   let error: string | null = null;
   try {
     await reconcile(events);
+    console.log('[calendar-sync] done');
     meta.lastSyncedAt = new Date().toISOString();
     attempt = 0;
   } catch (e) {
+    console.warn('[calendar-sync] failed', e);
     error = describe(e);
     if (attempt < RETRY_DELAYS_MS.length && !(e instanceof Error && ['permission', 'missing'].includes(e.message))) {
       retryTimer = setTimeout(() => syncEvents(events), RETRY_DELAYS_MS[attempt++]);
