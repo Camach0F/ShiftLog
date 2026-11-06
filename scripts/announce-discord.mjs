@@ -39,11 +39,15 @@ const line = (change) => {
   return title ? `${emoji} **${title}** — ${capitalize(rest.join(': '))}` : `${emoji} ${change}`;
 };
 
+// The channel where members pick up the role that is mentioned above the embed.
+const ROLE_CHANNEL_ID = '1567328874281574451';
+
 const description = [
   `## 🚀 ¡Ya está aquí la V${version}!`,
   changes.length > 0 ? changes.map(line).join('\n\n') : '✨ Ya hay una versión nueva de ShiftLog.',
   '━━━━━━━━━━━━━━━━━━',
   '📲 **Cómo actualizar:** desde la propia app en **Ajustes → Actualizaciones**, o con el botón de abajo. Tus datos se conservan.',
+  `🔔 **Recibe los avisos:** para enterarte de cada versión, consigue el rol <@&${role}> en <#${ROLE_CHANNEL_ID}>.`,
   '💙 **Apoya el proyecto:** ShiftLog es gratis y sin anuncios. Si te gusta, puedes apoyarlo con una donación única del importe que quieras, sin suscripciones, con los botones de abajo.',
   '💬 ¿Dudas o algún fallo? Escríbenos aquí, estamos dando soporte en este Discord.',
 ].join('\n\n');
