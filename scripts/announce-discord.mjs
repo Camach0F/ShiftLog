@@ -2,17 +2,19 @@
 // version (from src/lib/changelog.ts), a button to download the APK and, if set, a role mention.
 //
 // Environment: DISCORD_WEBHOOK_URL (secret), VERSION (e.g. 1.0.1), and optionally
-// DISCORD_ROLE_ID (another role to mention) and DISCORD_IMAGE_URL (image of the embed).
+// DISCORD_ROLE_ID (another role to mention) and DISCORD_IMAGE_URL (another image for the embed;
+// the default is docs/discord-update.gif of this repository).
 // Run with `node --experimental-strip-types scripts/announce-discord.mjs [--dry-run]`.
 import { releaseFor } from '../src/lib/changelog.ts';
 import { PAYPAL_URL, SPONSORS_URL } from '../src/lib/links.ts';
 
-const { DISCORD_WEBHOOK_URL: webhook, VERSION: version, DISCORD_IMAGE_URL: image } = process.env;
+const { DISCORD_WEBHOOK_URL: webhook, VERSION: version } = process.env;
 // The role that gets the announcement (a role id is not a secret).
 const role = process.env.DISCORD_ROLE_ID || '1567309930317484266';
 const repo = 'https://github.com/Camach0F/ShiftLog';
 const rawRepo = 'https://raw.githubusercontent.com/Camach0F/ShiftLog/main';
 const dryRun = process.argv.includes('--dry-run');
+const image = process.env.DISCORD_IMAGE_URL || `${rawRepo}/docs/discord-update.gif`;
 
 if (!version || (!webhook && !dryRun)) {
   console.error('Missing VERSION or DISCORD_WEBHOOK_URL.');
@@ -52,7 +54,7 @@ const payload = {
       color: 0x2f6bff,
       footer: { text: 'ShiftLog · Gratis, sin anuncios y de código abierto', icon_url: `${rawRepo}/assets/icon.png` },
       timestamp: new Date().toISOString(),
-      ...(image && { image: { url: image } }),
+      image: { url: image },
     },
   ],
   components: [
