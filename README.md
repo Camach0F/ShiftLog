@@ -72,10 +72,11 @@ La app tiene dos partes separadas:
   <img src="docs/screenshots/resumen-oscuro.png" width="30%" alt="Resumen en modo oscuro">
 </p>
 
-Al instalarla, una guía te lleva paso a paso por las pantallas, y puedes volver a abrirla desde Ajustes:
+Al instalarla, una guía te lleva paso a paso por las pantallas, y puedes volver a abrirla desde Ajustes. Cada categoría tiene su informe y su PDF (`ShiftLog - [Categoría] [Mes] [Año].pdf`):
 
 <p align="center">
   <img src="docs/screenshots/guia.png" width="30%" alt="Guía de bienvenida de la app">
+  <img src="docs/screenshots/informe-pdf.png" width="30%" alt="Generar el PDF de una categoría y un mes">
 </p>
 
 En tablet y pantallas anchas aparece una barra lateral y el calendario se muestra más grande:
