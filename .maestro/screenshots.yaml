@@ -3,15 +3,19 @@
 # days of the neighbouring months are 1-6 and 23-31).
 appId: com.camach0f.shiftlog
 ---
-- launchApp:
-    clearState: true
-    # The app asks for it after the guide; granting it here keeps the dialog out of the way
-    permissions:
-      notifications: allow
+# Android sometimes kills the app right after the data is cleared: start it again if it never shows
+- retry:
+    maxRetries: 3
+    commands:
+      - launchApp:
+          clearState: true
+          # The app asks for it after the guide; granting it here keeps the dialog out of the way
+          permissions:
+            notifications: allow
+      - extendedWaitUntil:
+          visible: "Te damos la bienvenida a ShiftLog"
+          timeout: 20000
 # The guide opens by itself on a fresh install: a screenshot of its second step, then skip it
-- extendedWaitUntil:
-    visible: "Te damos la bienvenida a ShiftLog"
-    timeout: 20000
 - tapOn: "Siguiente"
 - extendedWaitUntil:
     visible: "1. Crea tu trabajo"

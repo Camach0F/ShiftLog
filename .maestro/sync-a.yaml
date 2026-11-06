@@ -2,15 +2,19 @@
 # connect the phone calendar (the test script creates it beforehand and checks what lands in it).
 appId: com.camach0f.shiftlog
 ---
-- launchApp:
-    clearState: true
-    # The app asks for it after the guide; granting it here keeps the dialog out of the way
-    permissions:
-      notifications: allow
+# Android sometimes kills the app right after the data is cleared: start it again if it never shows
+- retry:
+    maxRetries: 3
+    commands:
+      - launchApp:
+          clearState: true
+          # The app asks for it after the guide; granting it here keeps the dialog out of the way
+          permissions:
+            notifications: allow
+      - extendedWaitUntil:
+          visible: "Saltar guía"
+          timeout: 20000
 # The guide opens by itself on a fresh install: skip it
-- extendedWaitUntil:
-    visible: "Saltar guía"
-    timeout: 20000
 - tapOn: "Saltar guía"
 
 # A category with a new job inside, then an existing job moved into it

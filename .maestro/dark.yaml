@@ -1,7 +1,14 @@
 # The same screens in dark mode (the workflow switches the emulator to night mode first).
 appId: com.camach0f.shiftlog
 ---
-- launchApp
+# The app is started again if it never shows
+- retry:
+    maxRetries: 3
+    commands:
+      - launchApp
+      - extendedWaitUntil:
+          visible: "Agenda"
+          timeout: 20000
 - assertVisible: "Agenda"
 - takeScreenshot: dark-01-agenda
 - tapOn: "Turnos"

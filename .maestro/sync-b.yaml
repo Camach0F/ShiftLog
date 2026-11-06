@@ -1,7 +1,14 @@
 # Calendar sync, part 2: editing and deleting agenda events must reach the calendar.
 appId: com.camach0f.shiftlog
 ---
-- launchApp
+# The app is started again if it never shows
+- retry:
+    maxRetries: 3
+    commands:
+      - launchApp
+      - extendedWaitUntil:
+          visible: "Agenda"
+          timeout: 20000
 - tapOn: "Agenda"
 # The events of the day are below the calendar
 - scrollUntilVisible:
