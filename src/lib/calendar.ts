@@ -145,14 +145,31 @@ export async function listCalendars(): Promise<CalendarOption[]> {
 
 let running = false;
 let queued: AgendaEvent[] | null = null;
+// After a failure (the calendar app restarting, for example) the sync is tried again a little later.
+const RETRY_DELAYS_MS = [5000, 30000, 120000];
+let attempt = 0;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** Deletes one event this app wrote to the calendar and forgets the link. */
-async function drop(key: string): Promise<void> {
+const isMissing = (e: unknown) =>
+  /NOT_FOUND/i.test(String((e as { code?: string })?.code ?? '')) || /not found|could not be found/i.test(String((e as Error)?.message ?? ''));
+
+/** The calendar event of a link, or null if it is gone; any other failure (the provider restarting...) is thrown. */
+async function find(id: string): Promise<Calendar.ExpoCalendarEvent | null> {
   try {
-    await (await Calendar.ExpoCalendarEvent.get(meta.linked[key].id)).delete();
-  } catch {
-    // Already gone from the calendar.
+    return await Calendar.ExpoCalendarEvent.get(id);
+  } catch (e) {
+    if (isMissing(e)) return null;
+    throw e;
   }
+}
+
+/**
+ * Deletes one event this app wrote to the calendar and forgets the link. If the delete fails the
+ * link stays, so the event is not left behind forever: the next sync tries again.
+ */
+async function drop(key: string): Promise<void> {
+  const event = await find(meta.linked[key].id);
+  if (event) await event.delete();
   delete meta.linked[key];
 }
 
@@ -182,13 +199,13 @@ async function reconcile(events: AgendaEvent[]): Promise<void> {
     const link = meta.linked[event.id];
     if (link?.sig === sig) continue;
     if (link) {
-      try {
-        await (await Calendar.ExpoCalendarEvent.get(link.id)).update(details(event));
+      const existing = await find(link.id);
+      if (existing) {
+        await existing.update(details(event));
         meta.linked[event.id] = { id: link.id, sig };
         continue;
-      } catch {
-        // The event was deleted from the calendar by hand: write it again.
       }
+      // The event was deleted from the calendar by hand: write it again.
     }
     const created = await calendar.createEvent(details(event));
     meta.linked[event.id] = { id: created.id, sig };
@@ -203,13 +220,19 @@ export async function syncEvents(events: AgendaEvent[]): Promise<void> {
     return;
   }
   running = true;
+  if (retryTimer) clearTimeout(retryTimer);
+  retryTimer = null;
   publish({ busy: true, error: null });
   let error: string | null = null;
   try {
     await reconcile(events);
     meta.lastSyncedAt = new Date().toISOString();
+    attempt = 0;
   } catch (e) {
     error = describe(e);
+    if (attempt < RETRY_DELAYS_MS.length && !(e instanceof Error && ['permission', 'missing'].includes(e.message))) {
+      retryTimer = setTimeout(() => syncEvents(events), RETRY_DELAYS_MS[attempt++]);
+    }
   } finally {
     await saveMeta();
     running = false;
