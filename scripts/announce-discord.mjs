@@ -29,7 +29,7 @@ const changes = releaseFor(version)?.changes ?? [];
 const test = Boolean(process.env.DISCORD_TEST);
 
 // Each change reads "Title: text" in the app; here the title gets bold and an emoji.
-const EMOJIS = { categorías: '🗂️', calendario: '📅', pdf: '📄', actualizaciones: '🔄', novedades: '🔔', 'primera versión': '🎉' };
+const EMOJIS = { categorías: '🗂️', calendario: '📅', pdf: '📄', actualizaciones: '🔄', guía: '🧭', novedades: '🔔', 'primera versión': '🎉' };
 const line = (change) => {
   const [head, ...rest] = change.split(': ');
   const title = rest.length > 0 ? head : '';

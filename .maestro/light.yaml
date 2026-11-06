@@ -4,6 +4,20 @@ appId: com.camach0f.shiftlog
 ---
 - launchApp:
     clearState: true
+
+# The guide opens by itself on a fresh install: go through every step
+- extendedWaitUntil:
+    visible: "Te damos la bienvenida a ShiftLog"
+    timeout: 20000
+- takeScreenshot: 00-guia
+- repeat:
+    times: 7
+    commands:
+      - tapOn: "Siguiente"
+- assertVisible: "Unirme al Discord"
+- takeScreenshot: 00b-guia-final
+- tapOn: "Empezar"
+- assertNotVisible: "Empezar"
 - assertVisible: "Agenda"
 # The test build calls itself 0.9.0, so the published release is an update
 - extendedWaitUntil:
@@ -94,3 +108,11 @@ appId: com.camach0f.shiftlog
 - takeScreenshot: 16-novedades
 - tapOn: "Aceptar"
 - assertNotVisible: "Unirme al Discord"
+
+# The guide can be opened again from Settings
+- scrollUntilVisible:
+    element: "Ver la guía de la app"
+- tapOn: "Ver la guía de la app"
+- assertVisible: "Te damos la bienvenida a ShiftLog"
+- tapOn: "Saltar guía"
+- assertNotVisible: "Saltar guía"

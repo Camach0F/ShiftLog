@@ -4,6 +4,11 @@ appId: com.camach0f.shiftlog
 ---
 - launchApp:
     clearState: true
+# The guide opens by itself on a fresh install: skip it
+- extendedWaitUntil:
+    visible: "Saltar guía"
+    timeout: 20000
+- tapOn: "Saltar guía"
 
 # A category with a new job inside, then an existing job moved into it
 - tapOn: "Trabajos"

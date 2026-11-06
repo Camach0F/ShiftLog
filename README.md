@@ -79,6 +79,7 @@ En tablet y pantallas anchas aparece una barra lateral y el calendario se muestr
   <img src="docs/screenshots/tablet-resumen.png" width="47%" alt="Resumen en tablet">
 </p>
 
+- **Guía por la app**: al instalarla te enseña, pantalla a pantalla, cómo crear un trabajo, apuntar turnos y ver el resumen. Se puede volver a abrir desde Ajustes.
 - Modo claro y oscuro, adaptado a móvil y tablet (en pantallas anchas, barra lateral y calendario con el día a un lado).
 - Horas y fechas con teclado numérico (los dos puntos y los guiones se añaden solos) o con el selector nativo de Android.
 

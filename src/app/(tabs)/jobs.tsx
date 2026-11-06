@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Share, StyleSheet, Switch, Text, View } from 'react-native';
 
 import { BackupCard } from '@/components/BackupCard';
 import { CalendarCard } from '@/components/CalendarCard';
@@ -9,8 +9,10 @@ import { UpdateBanner } from '@/components/UpdateBanner';
 import { UpdateCard } from '@/components/UpdateCard';
 import { currentRelease, WhatsNewDialog } from '@/components/WhatsNew';
 import { Button, Card, Field } from '@/components/ui';
+import { DISCORD_URL } from '@/lib/links';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
+import { openTour } from '@/lib/tour';
 import type { Category, Job } from '@/lib/types';
 
 const SHARE_MESSAGE =
@@ -183,6 +185,18 @@ export default function JobsScreen() {
         </View>
       </Card>
       <WhatsNewDialog visible={notesOpen} release={currentRelease()} onClose={() => setNotesOpen(false)} />
+
+      <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>AYUDA</Text>
+      <Card>
+        <Text style={{ color: t.text, fontSize: 16 }}>¿Te has perdido?</Text>
+        <Text style={{ color: t.sub, fontSize: 12, marginTop: 2, marginBottom: 10 }}>
+          Un recorrido rápido por la app, pantalla a pantalla. Si sigues con dudas, te ayudamos en Discord.
+        </Text>
+        <View style={{ gap: 10 }}>
+          <Button label="Ver la guía de la app" variant="secondary" onPress={openTour} />
+          <Button label="Soporte en Discord" variant="secondary" onPress={() => Linking.openURL(DISCORD_URL).catch(() => {})} />
+        </View>
+      </Card>
 
       <Text style={[styles.section, { color: t.sub, marginTop: 28 }]}>COMPARTIR</Text>
       <Card>

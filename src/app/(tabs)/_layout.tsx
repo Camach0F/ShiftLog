@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 
 import { BackupAutoSave } from '@/components/BackupCard';
 import { CalendarAutoSync } from '@/components/CalendarCard';
+import { TourHost } from '@/components/Tour';
 import { WhatsNewAuto } from '@/components/WhatsNew';
 import { useLayout } from '@/lib/layout';
 import { useStore } from '@/lib/store';
@@ -38,6 +39,7 @@ export default function TabsLayout() {
       <BackupAutoSave />
       <CalendarAutoSync />
       <WhatsNewAuto />
+      <TourHost />
       <Tabs
         screenOptions={{
           tabBarPosition: isWide ? 'left' : 'bottom',
