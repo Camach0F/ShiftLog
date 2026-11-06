@@ -40,16 +40,22 @@ appId: com.camach0f.shiftlog
 
 # Three agenda events from the built-in templates: all day, 09:00 and 10:00
 - tapOn: "Agenda"
+- scrollUntilVisible:
+    element: "Nuevo evento"
 - tapOn: "Nuevo evento"
 - tapOn: "Cumpleaños"
 - scrollUntilVisible:
     element: "Guardar"
 - tapOn: "Guardar"
+- scrollUntilVisible:
+    element: "Nuevo evento"
 - tapOn: "Nuevo evento"
 - tapOn: "Reunión"
 - scrollUntilVisible:
     element: "Guardar"
 - tapOn: "Guardar"
+- scrollUntilVisible:
+    element: "Nuevo evento"
 - tapOn: "Nuevo evento"
 - tapOn: "Médico"
 - scrollUntilVisible:

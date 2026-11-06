@@ -22,7 +22,10 @@ fi
 
 # What the app has written to the phone's calendar, one line per event.
 calendar_events() {
-  adb shell "content query --uri content://com.android.calendar/events --projection title:allDay:dtstart:dtend:description:eventTimezone --where 'deleted=0'" > "$1"
+  for _ in 1 2 3; do
+    adb shell "content query --uri content://com.android.calendar/events --projection title:allDay:dtstart:dtend:description:eventTimezone --where 'deleted=0'" > "$1" 2>&1 && break
+    sleep 5
+  done
   cat "$1"
 }
 
@@ -48,7 +51,7 @@ adb shell cmd uimode night yes
 maestro test --test-output-dir "$OUT/maestro-dark" "$ROOT/.maestro/dark.yaml" || status=$?
 
 kill "$LOGCAT" 2>/dev/null
-if grep -q "FATAL EXCEPTION" "$OUT/logcat.txt"; then
+if grep -A1 "FATAL EXCEPTION" "$OUT/logcat.txt" | grep -q "Process: com.camach0f.shiftlog"; then
   echo "::error::The app crashed (see logcat.txt)"
   status=1
 fi

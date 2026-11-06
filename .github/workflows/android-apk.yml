@@ -18,6 +18,8 @@ jobs:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      # Optional: announce releases on Discord (the webhook URL is a secret; the role and image are variables)
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     steps:
       - name: Check the signing secrets exist
         run: |
@@ -86,3 +88,13 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" ShiftLog.apk \
             --title "ShiftLog $VERSION" --generate-notes
+
+      # An embed in the announcements channel with the changes, a download button and a role mention.
+      # Skipped until the DISCORD_WEBHOOK_URL secret exists; a failure here does not undo the release.
+      - name: Announce on Discord
+        if: startsWith(github.ref, 'refs/tags/v') && env.DISCORD_WEBHOOK_URL != ''
+        continue-on-error: true
+        env:
+          DISCORD_ROLE_ID: ${{ vars.DISCORD_ROLE_ID }}
+          DISCORD_IMAGE_URL: ${{ vars.DISCORD_IMAGE_URL }}
+        run: node --experimental-strip-types scripts/announce-discord.mjs

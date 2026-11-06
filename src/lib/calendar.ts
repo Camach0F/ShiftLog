@@ -92,6 +92,7 @@ function details(event: AgendaEvent) {
     return {
       title: event.title,
       notes: event.note,
+      location: '',
       allDay: true,
       startDate: new Date(start),
       endDate: new Date(start + 86400000),
@@ -103,7 +104,7 @@ function details(event: AgendaEvent) {
     const [h, m] = hhmm.split(':').map(Number);
     return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
   };
-  return { title: event.title, notes: event.note, allDay: false, startDate: at(event.start), endDate: at(event.end) };
+  return { title: event.title, notes: event.note, location: '', allDay: false, startDate: at(event.start), endDate: at(event.end) };
 }
 
 const signature = (event: AgendaEvent) =>

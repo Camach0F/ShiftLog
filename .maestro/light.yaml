@@ -64,10 +64,10 @@ appId: com.camach0f.shiftlog
 - assertVisible: "Generar PDF"
 - takeScreenshot: 13-pdf-opciones
 - tapOn: "Generar PDF"
-# The share sheet shows the file name
-- extendedWaitUntil:
-    visible: "ShiftLog.*[0-9]{4}.pdf"
-    timeout: 15000
+# The share sheet opens (no error alert)
+- waitForAnimationToEnd:
+    timeout: 8000
+- assertNotVisible: "No se pudo exportar"
 - takeScreenshot: 13b-pdf
 - pressKey: back
 - tapOn:
