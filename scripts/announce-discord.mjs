@@ -1,23 +1,27 @@
 // Announces a release in a Discord channel through a webhook: an embed with the changes of the
 // version (from src/lib/changelog.ts), a button to download the APK and, if set, a role mention.
 //
-// Environment: DISCORD_WEBHOOK_URL (secret), VERSION (e.g. 1.0.1), and optionally
-// DISCORD_ROLE_ID (another role to mention) and DISCORD_IMAGE_URL (another image for the embed;
-// the default is docs/discord-update.gif of this repository).
+// Environment: DISCORD_WEBHOOK_URL (secret), VERSION (e.g. 1.0.1) and, as repository variables,
+// DISCORD_ROLE_ID (the role to mention) and the ids of the custom emojis of the buttons:
+// DISCORD_EMOJI_GITHUB, DISCORD_EMOJI_SPONSORS, DISCORD_EMOJI_PAYPAL, DISCORD_EMOJI_SHIFTLOG.
+// DISCORD_IMAGE_URL can replace the image (the default is docs/discord-update.gif of this repository).
 // Run with `node --experimental-strip-types scripts/announce-discord.mjs [--dry-run]`.
 import { releaseFor } from '../src/lib/changelog.ts';
 import { PAYPAL_URL, SPONSORS_URL } from '../src/lib/links.ts';
 
 const { DISCORD_WEBHOOK_URL: webhook, VERSION: version } = process.env;
-// The role that gets the announcement (a role id is not a secret).
-const role = process.env.DISCORD_ROLE_ID || '1567309930317484266';
+const { DISCORD_ROLE_ID: role, DISCORD_EMOJI_GITHUB, DISCORD_EMOJI_SPONSORS, DISCORD_EMOJI_PAYPAL, DISCORD_EMOJI_SHIFTLOG } = process.env;
 const repo = 'https://github.com/Camach0F/ShiftLog';
 const rawRepo = 'https://raw.githubusercontent.com/Camach0F/ShiftLog/main';
 const dryRun = process.argv.includes('--dry-run');
 const image = process.env.DISCORD_IMAGE_URL || `${rawRepo}/docs/discord-update.gif`;
 
-if (!version || (!webhook && !dryRun)) {
-  console.error('Missing VERSION or DISCORD_WEBHOOK_URL.');
+// Better to fail with a clear message than to post an announcement without its mention or icons.
+const required = { VERSION: version, DISCORD_ROLE_ID: role, DISCORD_EMOJI_GITHUB, DISCORD_EMOJI_SPONSORS, DISCORD_EMOJI_PAYPAL, DISCORD_EMOJI_SHIFTLOG };
+if (!dryRun) required.DISCORD_WEBHOOK_URL = webhook;
+const missing = Object.entries(required).filter(([, value]) => !value).map(([name]) => name);
+if (missing.length > 0) {
+  console.error(`Missing: ${missing.join(', ')}. Set them as repository variables or secrets.`);
   process.exit(1);
 }
 
@@ -62,12 +66,12 @@ const payload = {
       type: 1,
       components: [
         // Link buttons; the icons are custom emojis of the server.
-        { label: 'Release', emoji: { name: 'GitHub', id: '1567333847257845854' }, url: test ? `${repo}/releases/latest` : `${repo}/releases/tag/v${version}` },
-        { label: 'GitHub Sponsors', emoji: { name: 'GitHubSponsors', id: '1567342040344170518' }, url: SPONSORS_URL },
-        { label: 'PayPal', emoji: { name: 'Paypal', id: '1473390588555432037' }, url: PAYPAL_URL },
+        { label: 'Release', emoji: { name: 'GitHub', id: DISCORD_EMOJI_GITHUB }, url: test ? `${repo}/releases/latest` : `${repo}/releases/tag/v${version}` },
+        { label: 'GitHub Sponsors', emoji: { name: 'GitHubSponsors', id: DISCORD_EMOJI_SPONSORS }, url: SPONSORS_URL },
+        { label: 'PayPal', emoji: { name: 'Paypal', id: DISCORD_EMOJI_PAYPAL }, url: PAYPAL_URL },
         {
           label: `Descargar V${version}`,
-          emoji: { name: 'Shiftlog', id: '1567331642438324244' },
+          emoji: { name: 'Shiftlog', id: DISCORD_EMOJI_SHIFTLOG },
           url: test ? `${repo}/releases/latest/download/ShiftLog.apk` : `${repo}/releases/download/v${version}/ShiftLog.apk`,
         },
       ].map((button) => ({ type: 2, style: 5, ...button })),

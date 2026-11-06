@@ -96,4 +96,8 @@ jobs:
         continue-on-error: true
         env:
           DISCORD_ROLE_ID: ${{ vars.DISCORD_ROLE_ID }}
+          DISCORD_EMOJI_GITHUB: ${{ vars.DISCORD_EMOJI_GITHUB }}
+          DISCORD_EMOJI_SPONSORS: ${{ vars.DISCORD_EMOJI_SPONSORS }}
+          DISCORD_EMOJI_PAYPAL: ${{ vars.DISCORD_EMOJI_PAYPAL }}
+          DISCORD_EMOJI_SHIFTLOG: ${{ vars.DISCORD_EMOJI_SHIFTLOG }}
         run: node --experimental-strip-types scripts/announce-discord.mjs
