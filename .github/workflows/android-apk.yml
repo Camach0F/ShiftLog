@@ -20,6 +20,8 @@ jobs:
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       # Optional: announce releases on Discord (the webhook URL is a secret)
       DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      # Optional: push notification to the phones that have the app (service account key of the Firebase project)
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
     steps:
       - name: Check the signing secrets exist
         run: |
@@ -101,3 +103,9 @@ jobs:
           DISCORD_EMOJI_PAYPAL: ${{ vars.DISCORD_EMOJI_PAYPAL }}
           DISCORD_EMOJI_SHIFTLOG: ${{ vars.DISCORD_EMOJI_SHIFTLOG }}
         run: node --experimental-strip-types scripts/announce-discord.mjs
+
+      # The "new version" push notification. Skipped until the FIREBASE_SERVICE_ACCOUNT secret exists.
+      - name: Send the push notification
+        if: startsWith(github.ref, 'refs/tags/v') && env.FIREBASE_SERVICE_ACCOUNT != ''
+        continue-on-error: true
+        run: node scripts/notify-push.mjs
