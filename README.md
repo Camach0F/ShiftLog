@@ -55,7 +55,7 @@ La app tiene dos partes separadas:
 ### Horas y resumen
 - Resumen por semana, mes o año, con desglose por trabajo y por turno.
 - **Horas extra** por trabajo (límite diario y semanal, con multiplicador de pago).
-- Exportación a **PDF** (informe por días con el logo de la app; eliges el mes y la categoría, y el archivo se llama «ShiftLog | Hostelería Noviembre 2026.pdf») y a **CSV**.
+- Exportación a **PDF** (informe por días con el logo de la app; eliges el mes y la categoría, y el archivo se llama «ShiftLog - Hostelería Noviembre 2026.pdf») y a **CSV**.
 
 ### Agenda
 - Eventos de todo el día o con horas (se pueden tomar las horas de uno de tus turnos).
