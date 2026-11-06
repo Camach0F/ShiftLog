@@ -8,7 +8,7 @@ export type Release = { version: string; changes: string[] };
 export const CHANGELOG: Release[] = [
   {
     version: '1.0.2',
-    changes: ['PDF: Corrección de un fallo del PDF.'],
+    changes: ['PDF: Corrección de un fallo del PDF. Ya no muestra la categoría ni el desglose de trabajos bajo el total de horas.'],
   },
   {
     version: '1.0.1',
