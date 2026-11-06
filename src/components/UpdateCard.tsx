@@ -18,7 +18,7 @@ export function UpdateCard({ notice = false }: { notice?: boolean }) {
     if (notice && dismissed) return null;
     return (
       <Card style={{ marginBottom: 16 }}>
-        <Text style={{ color: t.text, fontSize: 16, fontWeight: '700' }}>Hay una versión nueva: {update.version}</Text>
+        <Text style={{ color: t.text, fontSize: 16, fontWeight: '700' }}>Hay una versión nueva: V{update.version}</Text>
         <Text style={{ color: t.sub, marginTop: 2 }}>
           Tienes la {installedVersion} · {update.sizeMb} MB
         </Text>

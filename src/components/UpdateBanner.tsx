@@ -18,7 +18,7 @@ export function UpdateBanner() {
     <View style={[styles.banner, { backgroundColor: t.accent }]}>
       <Ionicons name="arrow-down-circle" size={26} color={t.onAccent} />
       <View style={{ flex: 1 }}>
-        <Text style={{ color: t.onAccent, fontSize: 15, fontWeight: '700' }}>Hay una actualización: {update.version}</Text>
+        <Text style={{ color: t.onAccent, fontSize: 15, fontWeight: '700' }}>Hay una actualización: V{update.version}</Text>
         <Text style={{ color: t.onAccent, fontSize: 12, opacity: 0.9 }}>Tus datos se conservan.</Text>
       </View>
       <Pressable
