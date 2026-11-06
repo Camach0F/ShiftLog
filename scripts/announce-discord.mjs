@@ -46,7 +46,6 @@ const payload = {
   embeds: [
     {
       title: `ShiftLog V${version}${test ? ' (prueba)' : ''}`,
-      url: `${repo}/releases/tag/v${version}`,
       description,
       color: 0x2f6bff,
       footer: { text: 'ShiftLog · Gratis, sin anuncios y de código abierto', icon_url: `${rawRepo}/assets/icon.png` },
@@ -57,7 +56,17 @@ const payload = {
   components: [
     {
       type: 1,
-      components: [{ type: 2, style: 5, label: `Descargar V${version}`, url: test ? `${repo}/releases/latest/download/ShiftLog.apk` : `${repo}/releases/download/v${version}/ShiftLog.apk` }],
+      components: [
+        // Link buttons; the icons are custom emojis of the server.
+        { label: 'Release', emoji: { name: 'GitHub', id: '1567333847257845854' }, url: test ? `${repo}/releases/latest` : `${repo}/releases/tag/v${version}` },
+        { label: 'GitHub Sponsors', emoji: { name: 'GitHubSponsors', id: '1567342040344170518' }, url: 'https://github.com/sponsors/Camach0F' },
+        { label: 'PayPal', emoji: { name: 'Paypal', id: '1473390588555432037' }, url: 'https://www.paypal.com/paypalme/jcamachopay' },
+        {
+          label: `Descargar V${version}`,
+          emoji: { name: 'Shiftlog', id: '1567331642438324244' },
+          url: test ? `${repo}/releases/latest/download/ShiftLog.apk` : `${repo}/releases/download/v${version}/ShiftLog.apk`,
+        },
+      ].map((button) => ({ type: 2, style: 5, ...button })),
     },
   ],
 };
