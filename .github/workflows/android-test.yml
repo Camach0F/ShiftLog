@@ -32,6 +32,9 @@ jobs:
           distribution: temurin
           java-version: 17
       - run: npm ci
+      # What the PDF contains (the emulator test only sees that the share sheet opens)
+      - name: Check the contents of the PDF report
+        run: npx --yes tsx scripts/check-report.ts
       - name: Write the Firebase config
         env:
           GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
