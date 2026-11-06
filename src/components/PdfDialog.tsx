@@ -37,7 +37,7 @@ export function PdfDialog({
     setBusy(true);
     try {
       const scope: CategoryScope = chosen === 'all' ? 'all' : { categoryId: chosen === 'none' ? null : chosen };
-      const html = buildHtml(inCategory(state, scope), startOfMonth(anchor), endOfMonth(anchor), formatMonth(anchor), null, categoryName && `Categoría: ${categoryName}`);
+      const html = buildHtml(inCategory(state, scope), startOfMonth(anchor), endOfMonth(anchor), formatMonth(anchor), null);
       await sharePdf(html, pdfFileName(anchor, categoryName));
       onClose();
     } catch (e) {
