@@ -5,6 +5,7 @@
 // DISCORD_ROLE_ID (another role to mention) and DISCORD_IMAGE_URL (image of the embed).
 // Run with `node --experimental-strip-types scripts/announce-discord.mjs [--dry-run]`.
 import { releaseFor } from '../src/lib/changelog.ts';
+import { PAYPAL_URL, SPONSORS_URL } from '../src/lib/links.ts';
 
 const { DISCORD_WEBHOOK_URL: webhook, VERSION: version, DISCORD_IMAGE_URL: image } = process.env;
 // The role that gets the announcement (a role id is not a secret).
@@ -35,6 +36,7 @@ const description = [
   changes.length > 0 ? changes.map(line).join('\n\n') : '✨ Ya hay una versión nueva de ShiftLog.',
   '━━━━━━━━━━━━━━━━━━',
   '📲 **Cómo actualizar:** desde la propia app en **Ajustes → Actualizaciones**, o con el botón de abajo. Tus datos se conservan.',
+  '💙 **Apoya el proyecto:** ShiftLog es gratis y sin anuncios. Si te gusta, puedes apoyarlo con una donación única del importe que quieras, sin suscripciones, con los botones de abajo.',
   '💬 ¿Dudas o algún fallo? Escríbenos aquí, estamos dando soporte en este Discord.',
 ].join('\n\n');
 
@@ -59,8 +61,8 @@ const payload = {
       components: [
         // Link buttons; the icons are custom emojis of the server.
         { label: 'Release', emoji: { name: 'GitHub', id: '1567333847257845854' }, url: test ? `${repo}/releases/latest` : `${repo}/releases/tag/v${version}` },
-        { label: 'GitHub Sponsors', emoji: { name: 'GitHubSponsors', id: '1567342040344170518' }, url: 'https://github.com/sponsors/Camach0F' },
-        { label: 'PayPal', emoji: { name: 'Paypal', id: '1473390588555432037' }, url: 'https://www.paypal.com/paypalme/jcamachopay' },
+        { label: 'GitHub Sponsors', emoji: { name: 'GitHubSponsors', id: '1567342040344170518' }, url: SPONSORS_URL },
+        { label: 'PayPal', emoji: { name: 'Paypal', id: '1473390588555432037' }, url: PAYPAL_URL },
         {
           label: `Descargar V${version}`,
           emoji: { name: 'Shiftlog', id: '1567331642438324244' },

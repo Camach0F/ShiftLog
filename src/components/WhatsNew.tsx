@@ -3,7 +3,7 @@ import { Linking, Modal, ScrollView, StyleSheet, Text, View } from 'react-native
 
 import { Button } from '@/components/ui';
 import { CHANGELOG, releaseFor, type Release } from '@/lib/changelog';
-import { DISCORD_URL } from '@/lib/links';
+import { DISCORD_URL, PAYPAL_URL, SPONSORS_URL } from '@/lib/links';
 import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 import { installedVersion } from '@/lib/updates';
@@ -34,6 +34,20 @@ export function WhatsNewDialog({ visible, release, onClose }: { visible: boolean
               <Text style={{ color: t.sub, marginTop: 2 }}>
                 Estaremos dando soporte en nuestro Discord. Si tienes dudas, encuentras un fallo o quieres proponer algo, pásate por allí.
               </Text>
+            </View>
+            <View style={[styles.support, { backgroundColor: t.bg, borderColor: t.border }]}>
+              <Text style={{ color: t.text, fontWeight: '700' }}>Apoya el proyecto</Text>
+              <Text style={{ color: t.sub, marginTop: 2 }}>
+                ShiftLog es gratis, sin anuncios y de código abierto. Si te resulta útil, puedes hacer una donación única del importe que quieras. Sin suscripciones.
+              </Text>
+              <View style={styles.pair}>
+                <View style={{ flex: 1 }}>
+                  <Button label="GitHub Sponsors" variant="secondary" onPress={() => Linking.openURL(SPONSORS_URL).catch(() => {})} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button label="PayPal" variant="secondary" onPress={() => Linking.openURL(PAYPAL_URL).catch(() => {})} />
+                </View>
+              </View>
             </View>
             <View style={{ marginTop: 16, gap: 10 }}>
               <Button label="Unirme al Discord" variant="secondary" onPress={() => Linking.openURL(DISCORD_URL).catch(() => {})} />
@@ -88,4 +102,5 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', marginBottom: 14 },
   change: { flexDirection: 'row', gap: 8 },
   support: { borderRadius: 12, borderWidth: StyleSheet.hairlineWidth, padding: 12, marginTop: 16 },
+  pair: { flexDirection: 'row', gap: 10, marginTop: 12 },
 });
