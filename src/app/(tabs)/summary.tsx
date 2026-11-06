@@ -25,6 +25,12 @@ export default function SummaryScreen() {
   const [anchor, setAnchor] = useState(todayKey());
   const [jobFilter, setJobFilter] = useState<string | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  // Category the PDF dialog opens on: 'all', 'none' (without category) or a category id.
+  const [pdfScope, setPdfScope] = useState('all');
+  const openPdf = (scope: string) => {
+    setPdfScope(scope);
+    setPdfOpen(true);
+  };
   // A filter on a job that has since been deleted falls back to all jobs.
   const jobId = state.jobs.some((j) => j.id === jobFilter) ? jobFilter : null;
 
@@ -32,13 +38,20 @@ export default function SummaryScreen() {
   const totals = summarize(state, from, to, jobId);
   const maxMinutes = Math.max(1, ...totals.rows.map((r) => r.minutes));
 
-  // Subtotals of the jobs in each category; jobs without one are grouped last.
-  const categoryRows = [...state.categories.map((c) => ({ key: c.id, name: c.name })), { key: 'none', name: 'Sin categoría' }]
+  // One report card per category with the totals of its jobs; jobs without a category go last.
+  const categoryCards = [...state.categories.map((c) => ({ key: c.id, name: c.name })), { key: 'none', name: 'Sin categoría' }]
     .map(({ key, name }) => {
       const rows = totals.jobRows.filter((r) => (r.job.categoryId ?? 'none') === key);
-      return { key, name, minutes: rows.reduce((n, r) => n + r.minutes, 0), pay: rows.reduce((n, r) => n + r.pay, 0), jobs: rows.length };
+      return {
+        key,
+        name,
+        rows,
+        minutes: rows.reduce((n, r) => n + r.minutes, 0),
+        pay: rows.reduce((n, r) => n + r.pay, 0),
+        worked: rows.reduce((n, r) => n + r.worked, 0),
+      };
     })
-    .filter((r) => r.jobs > 0);
+    .filter((card) => card.rows.length > 0);
 
   const exportCsv = async () => {
     try {
@@ -96,7 +109,53 @@ export default function SummaryScreen() {
         {totals.pay > 0 && <Text style={[styles.pay, { color: t.accent }]}>{formatMoney(totals.pay, currency)}</Text>}
       </Card>
 
-      {jobId === null && totals.jobRows.length > 1 && (
+      {jobId === null && state.categories.length > 0 && categoryCards.length > 0 && (
+        <>
+          <Text style={[styles.section, { color: t.sub }]}>INFORME POR CATEGORÍA</Text>
+          <View style={{ gap: 12 }}>
+            {categoryCards.map((card) => (
+              <Card key={card.key} style={{ padding: 0, overflow: 'hidden' }}>
+                <View style={[styles.cardHead, { borderBottomColor: t.border }]}>
+                  <Text style={{ color: t.text, fontSize: 16, fontWeight: '700', flex: 1 }}>{card.name}</Text>
+                  <Pressable
+                    accessibilityLabel={`Generar el PDF de ${card.name}`}
+                    hitSlop={10}
+                    onPress={() => openPdf(card.key)}
+                  >
+                    <Ionicons name="share-outline" size={22} color={t.accent} />
+                  </Pressable>
+                </View>
+                {card.rows.map((r) => (
+                  <View key={r.job.id} style={styles.cardRow}>
+                    <View style={styles.jobName}>
+                      <View style={[styles.dot, { backgroundColor: r.job.color }]} />
+                      <View>
+                        <Text style={{ color: t.text, fontWeight: '600' }}>{r.job.name}</Text>
+                        <Text style={{ color: t.sub, fontSize: 12 }}>
+                          {r.worked} {r.worked === 1 ? 'turno' : 'turnos'}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={{ color: t.sub }}>
+                      {formatDuration(r.minutes)}
+                      {r.pay > 0 ? ` · ${formatMoney(r.pay, currency)}` : ''}
+                    </Text>
+                  </View>
+                ))}
+                <View style={[styles.cardTotal, { borderTopColor: t.border }]}>
+                  <Text style={{ color: t.sub }}>Total</Text>
+                  <Text style={{ color: t.accent, fontWeight: '700' }}>
+                    {formatDuration(card.minutes)}
+                    {card.pay > 0 ? ` · ${formatMoney(card.pay, currency)}` : ''}
+                  </Text>
+                </View>
+              </Card>
+            ))}
+          </View>
+        </>
+      )}
+
+      {jobId === null && state.categories.length === 0 && totals.jobRows.length > 1 && (
         <>
           <Text style={[styles.section, { color: t.sub }]}>POR TRABAJO</Text>
           <Card style={{ gap: 12 }}>
@@ -106,23 +165,6 @@ export default function SummaryScreen() {
                   <View style={[styles.dot, { backgroundColor: r.job.color }]} />
                   <Text style={{ color: t.text, fontWeight: '600' }}>{r.job.name}</Text>
                 </View>
-                <Text style={{ color: t.sub }}>
-                  {formatDuration(r.minutes)}
-                  {r.pay > 0 ? ` · ${formatMoney(r.pay, currency)}` : ''}
-                </Text>
-              </View>
-            ))}
-          </Card>
-        </>
-      )}
-
-      {jobId === null && categoryRows.length > 1 && (
-        <>
-          <Text style={[styles.section, { color: t.sub }]}>POR CATEGORÍA</Text>
-          <Card style={{ gap: 12 }}>
-            {categoryRows.map((r) => (
-              <View key={r.key} style={styles.rowTop}>
-                <Text style={{ color: t.text, fontWeight: '600' }}>{r.name}</Text>
                 <Text style={{ color: t.sub }}>
                   {formatDuration(r.minutes)}
                   {r.pay > 0 ? ` · ${formatMoney(r.pay, currency)}` : ''}
@@ -160,7 +202,7 @@ export default function SummaryScreen() {
       <Text style={[styles.section, { color: t.sub }]}>EXPORTAR</Text>
       <View style={styles.exportRow}>
         <View style={{ flex: 1 }}>
-          <Button label="PDF" variant="secondary" onPress={() => setPdfOpen(true)} />
+          <Button label="PDF" variant="secondary" onPress={() => openPdf('all')} />
         </View>
         <View style={{ flex: 1 }}>
           <Button label="CSV (Excel)" variant="secondary" onPress={exportCsv} />
@@ -169,7 +211,7 @@ export default function SummaryScreen() {
       <Text style={{ color: t.sub, fontSize: 12, marginTop: 8 }}>
         El PDF te deja elegir el mes y la categoría. El CSV exporta el periodo que ves arriba ({label}).
       </Text>
-      <PdfDialog visible={pdfOpen} initialAnchor={anchor} onClose={() => setPdfOpen(false)} />
+      <PdfDialog visible={pdfOpen} initialAnchor={anchor} initialScope={pdfScope} onClose={() => setPdfOpen(false)} />
     </ScrollView>
   );
 }
@@ -190,4 +232,7 @@ const styles = StyleSheet.create({
   jobName: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dot: { width: 12, height: 12, borderRadius: 6 },
   exportRow: { flexDirection: 'row', gap: 12 },
+  cardHead: { flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: StyleSheet.hairlineWidth },
+  cardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10 },
+  cardTotal: { flexDirection: 'row', justifyContent: 'space-between', padding: 14, borderTopWidth: StyleSheet.hairlineWidth },
 });

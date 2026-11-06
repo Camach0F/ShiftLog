@@ -9,7 +9,18 @@ import { useStore } from '@/lib/store';
 import { useTheme } from '@/lib/theme';
 
 /** Asks which month and which category the PDF report covers, then makes and shares it. */
-export function PdfDialog({ visible, initialAnchor, onClose }: { visible: boolean; initialAnchor: string; onClose: () => void }) {
+export function PdfDialog({
+  visible,
+  initialAnchor,
+  initialScope = 'all',
+  onClose,
+}: {
+  visible: boolean;
+  initialAnchor: string;
+  /** Category the dialog opens on: 'all', 'none' (uncategorized) or a category id */
+  initialScope?: string;
+  onClose: () => void;
+}) {
   const t = useTheme();
   const { state } = useStore();
   const [anchor, setAnchor] = useState(initialAnchor);
@@ -37,7 +48,10 @@ export function PdfDialog({ visible, initialAnchor, onClose }: { visible: boolea
   };
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} onShow={() => setAnchor(initialAnchor)}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} onShow={() => {
+        setAnchor(initialAnchor);
+        setCategoryId(initialScope);
+      }}>
       <Pressable style={styles.backdrop} onPress={onClose}>
         <Pressable style={[styles.sheet, { backgroundColor: t.card }]} onPress={() => {}}>
           <ScrollView keyboardShouldPersistTaps="handled">

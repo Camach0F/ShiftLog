@@ -130,5 +130,12 @@ appId: com.camach0f.shiftlog
 # Summary and jobs
 - tapOn: "Resumen"
 - takeScreenshot: shot-resumen
+# The report card of a category has its own PDF button, which opens the dialog on that category
+- scrollUntilVisible:
+    element: "Generar el PDF de Trabajo principal"
+- tapOn: "Generar el PDF de Trabajo principal"
+- assertVisible: "Generar PDF"
+- takeScreenshot: shot-pdf-categoria
+- tapOn: "Cancelar"
 - tapOn: "Trabajos"
 - takeScreenshot: shot-trabajos
