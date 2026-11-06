@@ -78,8 +78,9 @@ appId: com.camach0f.shiftlog
 
 # Settings: updates
 - tapOn: "Trabajos"
+# The last button of the page first, so the card above it is on screen (also on a tablet)
 - scrollUntilVisible:
-    element: "ACTUALIZACIONES"
+    element: "Ver novedades de esta versión"
 # The test build is older than the latest release, so the card shows the new version.
 - extendedWaitUntil:
     visible: "Hay una versión nueva.*|Versión.*"
@@ -87,8 +88,6 @@ appId: com.camach0f.shiftlog
 - takeScreenshot: 15-actualizaciones
 
 # What's new popup, opened by hand: the changes, the Discord button and Accept
-- scrollUntilVisible:
-    element: "Ver novedades de esta versión"
 - tapOn: "Ver novedades de esta versión"
 - assertVisible: "Novedades de la versión.*"
 - assertVisible: "Unirme al Discord"
